@@ -1,0 +1,86 @@
+# Built application files
+*.apk
+*.ap_
+*.aab
+
+# Files for the ART/Dalvik VM
+*.dex
+
+# Java class files
+*.class
+
+# Generated files
+bin/
+gen/
+out/
+release/
+output/
+
+# Gradle
+.gradle/
+build/
+**/build/
+
+# Local configuration (SDK path, signing secrets)
+local.properties
+keystore.properties
+*.jks
+*.keystore
+*.p12
+*.pfx
+*.pem
+*.der
+*.csr
+
+# Android Studio / IntelliJ
+*.iml
+.idea/
+# Uncomment the next line if you want to track a shared IDE run config:
+# !.idea/runConfigurations/
+
+# Captures / profiling
+captures/
+.externalNativeBuild/
+.cxx/
+*.hprof
+*.log
+
+# NDK
+obj/
+
+# Kotlin
+.kotlin/
+
+# OS junk
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Test / coverage
+coverage/
+*.lcov
+.coverage
+jacoco*.exec
+test-results/
+reports/
+
+# Misc tooling
+*.swp
+*~
+.vscode/
+.fleet/
+*.orig
+*.bak
+
+# Secrets / env
+.env
+.env.*
+!.env.example
+
+# Local device captures (may contain phone numbers / PII)
+device_screen.png
+device_ui.xml
+
+# Local product/UX backlog (may reference private field-test context)
+docs/pending-changes.md
+**/pending-changes.md

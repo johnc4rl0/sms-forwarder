@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">SMS Forwarder</string>
+
+    <!-- Status notification -->
+    <string name="notification_channel_status">Forwarding status</string>
+    <string name="notification_channel_status_desc">Ongoing status while SMS forwarding is enabled</string>
+    <string name="notification_pause">Pause</string>
+    <string name="notification_title_enabled">SMS forwarding active</string>
+    <string name="notification_title_paused">SMS forwarding paused</string>
+    <string name="notification_title_safety">SMS forwarding safety-paused</string>
+    <string name="notification_title_unhealthy">SMS forwarding unhealthy</string>
+    <string name="notification_body_config">Source %1$s · Out %2$s · To %3$s</string>
+
+    <!-- Common -->
+    <string name="continue_action">Continue</string>
+    <string name="back_action">Back</string>
+    <string name="retry_action">Retry</string>
+    <string name="cancel_action">Cancel</string>
+    <string name="error_generic">Something went wrong. Please try again.</string>
+    <string name="error_not_ready">This step is not ready yet. Backend setup may still be incomplete.</string>
+    <string name="loading">Loading…</string>
+    <string name="not_available">—</string>
+
+    <!-- Root / app chrome -->
+    <string name="onboarding_title">Setup</string>
+    <string name="dashboard_title">SMS Forwarder</string>
+
+    <!-- Main NavigationBar -->
+    <string name="nav_status">Status</string>
+    <string name="nav_outcomes">Outcomes</string>
+    <string name="nav_settings">Settings</string>
+    <string name="status_title">Status</string>
+    <string name="outcomes_title">Outcomes</string>
+    <string name="outcomes_body">Forwarding log — metadata only. Message bodies and full numbers are not retained.</string>
+    <string name="outcomes_filter_all">All</string>
+    <string name="settings_title">Settings</string>
+    <string name="settings_intro">View and change forwarding setup. Destination changes require device authentication and re-verification.</string>
+    <string name="settings_current_setup">Current setup</string>
+    <string name="settings_inbound">Inbound (source)</string>
+    <string name="settings_outbound">Outbound (send)</string>
+    <string name="settings_destination">Destination</string>
+    <string name="settings_verified">Verified</string>
+    <string name="settings_not_verified">Not verified</string>
+    <string name="settings_edit">Edit setup</string>
+    <string name="settings_safety">Safety</string>
+    <string name="settings_dest_change_policy">Destination change</string>
+    <string name="settings_dest_change_policy_value">Auth + re-verify</string>
+    <string name="settings_line_change_policy">Line change</string>
+    <string name="settings_line_change_policy_value">Pause + purge unsent</string>
+    <string name="settings_about">About</string>
+    <string name="settings_edit_title">Edit setup</string>
+    <string name="settings_dest_dirty_warn">Changing destination clears verification and requires device authentication plus a new code. Forwarding stays off for the new number until verified.</string>
+    <string name="settings_continue_auth">Continue to authenticate</string>
+    <string name="settings_save_lines">Save line changes</string>
+    <string name="settings_reauth_title">Confirm change</string>
+    <string name="settings_reauth_headline">Authenticate to change destination</string>
+    <string name="settings_reauth_body">Destination updates are high risk. Confirm with biometric or device credential before we send a verification code to the new number.</string>
+    <string name="settings_reauth_action">Authenticate</string>
+    <string name="settings_reauth_auth_title">Confirm destination change</string>
+    <string name="settings_reauth_auth_subtitle">Authenticate to change the forwarding destination</string>
+    <string name="settings_reverify_title">Verify destination</string>
+    <string name="settings_reverify_headline">Confirm control of the number</string>
+    <string name="settings_reverify_body">Six-digit code, 10-minute expiry, five attempts, max three sends per hour. Previous destination verification is cleared until this succeeds.</string>
+    <string name="settings_new_destination">New destination</string>
+    <string name="settings_confirm_save">Confirm code &amp; save</string>
+    <string name="settings_discard">Discard changes</string>
+    <string name="settings_saved_banner">Setup saved. Destination verified. Re-enable from Status if forwarding is paused.</string>
+    <string name="settings_lines_saved">Line selection saved. Forwarding may be paused.</string>
+    <string name="settings_dest_unchanged_hint">Destination unchanged — only line changes will be applied.</string>
+    <string name="settings_dest_must_change_auth">Authenticate is required because the destination number changed.</string>
+    <string name="status_edit_in_settings">Edit setup in Settings.</string>
+
+    <!-- 1. Disclosure -->
+    <string name="disclosure_title">Important disclosure</string>
+    <string name="disclosure_body">This app copies received text SMS messages—including financial, account-recovery, and one-time passcode (OTP) messages—to another phone number you choose, in near real time when private install privileges are complete.\n\nForwarded messages may incur carrier charges on your outbound line. The recipient sees your selected outbound SIM as the sender.\n\nThis app is not the default messaging app. Timely OTP and sensitive SMS require a private installer grant (ADB appops). Without that grant, activation is blocked.\n\nYou will authenticate with your device lock before activation. Pausing never requires authentication.</string>
+    <string name="disclosure_otp_note">Timely OTP is required: complete private install (including sensitive-SMS privilege) so OTP-class SMS can be received without becoming the default messaging app.</string>
+    <string name="disclosure_accept">I understand and accept</string>
+
+    <!-- 2. Permissions -->
+    <string name="permissions_title">Permissions</string>
+    <string name="permissions_body">SMS Forwarder needs these permissions to receive and send text SMS on the lines you select. Hard-restricted SMS permissions must be allowlisted by your installer (ADB or managed device) before they can be granted.</string>
+    <string name="permissions_sms_receive">Receive SMS</string>
+    <string name="permissions_sms_send">Send SMS</string>
+    <string name="permissions_phone_state">Phone state (SIM identity)</string>
+    <string name="permissions_phone_numbers">Phone numbers</string>
+    <string name="permissions_notifications">Notifications (required while enabled)</string>
+    <string name="permissions_granted">Granted</string>
+    <string name="permissions_denied">Not granted</string>
+    <string name="permissions_request">Grant permissions</string>
+    <string name="permissions_open_settings">Open app settings</string>
+    <string name="permissions_hard_restricted_hint">If grant fails, reinstall with SMS permission allowlisting (see README).</string>
+    <string name="permissions_all_required">All listed permissions are required to continue.</string>
+
+    <!-- 3. Device security + hibernation -->
+    <string name="security_title">Device security</string>
+    <string name="security_body">Forwarding requires a secure lock screen. Activation and re-enablement use strong biometric or device credential authentication.</string>
+    <string name="security_lock_ok">Secure lock screen is set</string>
+    <string name="security_lock_missing">Set a screen lock (PIN, pattern, password, or biometric) in system settings.</string>
+    <string name="security_auth_ok">Device authentication is available</string>
+    <string name="security_auth_missing">Strong biometric or device credential is not available.</string>
+    <string name="security_hibernation_title">Unused app restrictions</string>
+    <string name="security_hibernation_body">Android may hibernate unused apps, revoking permissions and stopping background SMS receipt. Disable unused-app restrictions for SMS Forwarder.</string>
+    <string name="security_hibernation_ok">Unused-app restrictions are disabled for this app</string>
+    <string name="security_hibernation_risk">Unused-app restrictions appear enabled — forwarding may stop unexpectedly.</string>
+    <string name="security_hibernation_unknown">Could not determine unused-app restriction status. Check app settings.</string>
+    <string name="security_open_lock_settings">Open security settings</string>
+    <string name="security_open_hibernation">Manage unused-app restrictions</string>
+    <string name="security_continue_anyway">I understand the hibernation risk — continue</string>
+
+    <!-- 4–5. SIM selection -->
+    <string name="sim_inbound_title">Inbound SIM</string>
+    <string name="sim_inbound_body">Choose which installed SIM or eSIM receives messages to forward. Routing uses the subscription ID, not the displayed number.</string>
+    <string name="sim_outbound_title">Outbound SIM</string>
+    <string name="sim_outbound_body">Choose which line sends forwarded messages. This can differ from the inbound line. Carrier charges apply to this line.</string>
+    <string name="sim_slot">Slot %1$d</string>
+    <string name="sim_slot_unknown">Slot —</string>
+    <string name="sim_esim">eSIM</string>
+    <string name="sim_physical">SIM</string>
+    <string name="sim_number_unknown">Number not reported by OS</string>
+    <string name="sim_manual_number_label">Line number override (E.164)</string>
+    <string name="sim_manual_number_hint">+15551234567</string>
+    <string name="sim_manual_required">The OS did not report a number for this line. Enter it in E.164 format to continue.</string>
+    <string name="sim_manual_optional_hint">Routing uses the subscription ID. Enter a number only if the OS-reported value above is wrong.</string>
+    <string name="sim_os_number_wrong">OS number is wrong — enter different number</string>
+    <string name="sim_use_os_number">Use OS-reported number</string>
+    <string name="sim_none">No active SIM or eSIM found. Insert or enable a line, then retry.</string>
+    <string name="sim_select">Use this line</string>
+    <string name="sim_refresh">Refresh lines</string>
+    <string name="sim_invalid_e164">Enter a valid E.164 number (+country code, 8–15 digits total).</string>
+
+    <!-- 6. Destination -->
+    <string name="destination_title">Destination number</string>
+    <string name="destination_body">Enter the destination in E.164 format (for example +15551234567). It cannot match your source, outbound, or other local lines.</string>
+    <string name="destination_label">Destination (E.164)</string>
+    <string name="destination_hint">+15559876543</string>
+    <string name="destination_save">Save destination</string>
+    <string name="destination_verify_title">Verify destination</string>
+    <string name="destination_verify_body">We will send a six-digit code via your outbound SIM. The code expires in 10 minutes. You have five attempts. At most three codes per hour.</string>
+    <string name="destination_send_code">Send verification code</string>
+    <string name="destination_resend_code">Resend code</string>
+    <string name="destination_code_label">Verification code</string>
+    <string name="destination_confirm">Confirm code</string>
+    <string name="destination_sent">Code sent. Check the destination device.</string>
+    <string name="destination_rate_limited">Too many codes sent. Try again later (max 3 per hour).</string>
+    <string name="destination_outbound_unavailable">Outbound SIM is unavailable. Go back and reselect.</string>
+    <string name="destination_missing">Set a destination first.</string>
+    <string name="destination_verified">Destination verified.</string>
+    <string name="destination_expired">Code expired. Request a new one.</string>
+    <string name="destination_mismatch">Incorrect code. Try again.</string>
+    <string name="destination_locked">Too many attempts. Request a new code.</string>
+    <string name="destination_no_pending">No code pending. Send a code first.</string>
+    <string name="destination_reject_local">Destination cannot be a local or selected line number.</string>
+
+    <!-- 7. Activate -->
+    <string name="activate_title">Activate forwarding</string>
+    <string name="activate_body">Authenticate with your device credential or strong biometric to enable forwarding. A low-importance ongoing notification will show status with a Pause action.</string>
+    <string name="activate_summary_source">Source: %1$s</string>
+    <string name="activate_summary_outbound">Outbound: %1$s</string>
+    <string name="activate_summary_destination">Destination: %1$s</string>
+    <string name="activate_action">Authenticate and enable</string>
+    <string name="activate_auth_title">Confirm activation</string>
+    <string name="activate_auth_subtitle">Authenticate to enable SMS forwarding</string>
+    <string name="activate_auth_failed">Authentication failed.</string>
+    <string name="activate_auth_cancelled">Authentication cancelled.</string>
+    <string name="activate_blocked">Cannot enable: %1$s</string>
+    <string name="activate_success">Forwarding enabled.</string>
+
+    <!-- Dashboard -->
+    <string name="state_enabled">Enabled</string>
+    <string name="state_manually_paused">Manually paused</string>
+    <string name="state_safety_paused">Safety paused</string>
+    <string name="state_unhealthy">Unhealthy</string>
+    <string name="state_not_configured">Not configured</string>
+    <string name="dashboard_config_section">Configuration</string>
+    <string name="dashboard_source">Source</string>
+    <string name="dashboard_outbound">Outbound</string>
+    <string name="dashboard_destination">Destination</string>
+    <string name="dashboard_health_section">Health</string>
+    <string name="dashboard_health_permissions">Permissions</string>
+    <string name="dashboard_health_subscriptions">Subscriptions</string>
+    <string name="dashboard_health_notifications">Notifications</string>
+    <string name="dashboard_health_sensitive_sms">Sensitive SMS privilege</string>
+    <string name="dashboard_health_hibernation">Hibernation</string>
+    <string name="dashboard_health_ok">OK</string>
+    <string name="dashboard_health_bad">Issue</string>
+    <string name="dashboard_sensitive_sms_hint">Missing private grant. Re-run ./scripts/install-private.sh or: adb shell appops set com.johnc4rl0.smsforwarder RECEIVE_SENSITIVE_NOTIFICATIONS allow</string>
+    <string name="dashboard_quota_section">Rolling 24h quota</string>
+    <string name="dashboard_quota_messages">Source messages: %1$d / %2$d</string>
+    <string name="dashboard_quota_segments">Outbound segments: %1$d / %2$d</string>
+    <string name="dashboard_outcomes_section">Recent outcomes</string>
+    <string name="dashboard_outcomes_empty">No outcomes yet.</string>
+    <string name="dashboard_outcome_row">%1$s · attempts %2$d · segs %3$s</string>
+    <string name="dashboard_pause">Pause forwarding</string>
+    <string name="dashboard_reenable">Authenticate and re-enable</string>
+    <string name="dashboard_reenable_auth_title">Re-enable forwarding</string>
+    <string name="dashboard_reenable_auth_subtitle">Authenticate to resume SMS forwarding</string>
+    <string name="dashboard_pause_reason">Reason: %1$s</string>
+    <string name="dashboard_otp_requirement">Timely OTP requires the private sensitive-SMS privilege (install script). Multi-hour delayed OTP is not a supported mode.</string>
+    <string name="dashboard_force_stop_note">If the system force-stops this app, background receipt stops until you open the app again.</string>
+
+    <!-- Pause reasons (user-facing) -->
+    <string name="pause_manual">Manual pause</string>
+    <string name="pause_quota_messages">Daily source-message limit reached</string>
+    <string name="pause_quota_segments">Daily outbound-segment limit reached</string>
+    <string name="pause_permissions">Required permissions revoked</string>
+    <string name="pause_notifications">Notifications disabled</string>
+    <string name="pause_sensitive_sms_privilege">Sensitive SMS privilege missing (private ADB appops grant required for timely OTP)</string>
+    <string name="pause_source_inactive">Source SIM inactive or removed</string>
+    <string name="pause_outbound_inactive">Outbound SIM inactive or removed</string>
+    <string name="pause_source_identity">Source SIM identity changed</string>
+    <string name="pause_outbound_identity">Outbound SIM identity changed</string>
+    <string name="pause_missing_sub">Missing inbound subscription id</string>
+    <string name="pause_encryption">Encryption unavailable</string>
+    <string name="pause_hibernation">Unused-app hibernation risk</string>
+    <string name="pause_config">Configuration incomplete</string>
+</resources>

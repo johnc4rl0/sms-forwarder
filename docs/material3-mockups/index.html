@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SMS Forwarder — Material 3 mockups</title>
+  <link rel="stylesheet" href="m3.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    .card-link {
+      text-decoration: none;
+      color: inherit;
+      display: block;
+      width: 100%;
+      max-width: 380px;
+    }
+    .thumb {
+      background: var(--md-sys-color-surface-container-lowest);
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,.08);
+      transition: box-shadow .2s;
+      height: 100%;
+    }
+    .thumb:hover {
+      box-shadow: 0 8px 24px rgba(79,70,229,.18);
+    }
+    .thumb h2 {
+      font-size: 1rem;
+      font-weight: 500;
+      margin: 0 0 4px;
+    }
+    .thumb p {
+      margin: 0 0 16px;
+      font-size: 0.8125rem;
+      color: var(--md-sys-color-on-surface-variant);
+      line-height: 1.4;
+    }
+    .preview {
+      width: 100%;
+      aspect-ratio: 9/19.5;
+      max-height: 420px;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid var(--md-sys-color-outline-variant);
+      background: #f0eef5;
+    }
+    .preview iframe {
+      width: 360px;
+      height: 780px;
+      border: none;
+      transform: scale(0.48);
+      transform-origin: top left;
+      pointer-events: none;
+    }
+    .section-title {
+      grid-column: 1 / -1;
+      font-size: 1.125rem;
+      font-weight: 500;
+      margin: 16px 0 0;
+      color: var(--md-sys-color-on-surface);
+    }
+  </style>
+</head>
+<body>
+  <div class="gallery">
+    <h1>SMS Forwarder · Material 3 mockups</h1>
+    <p class="lede">
+      Graphic-only UI direction. Post-onboarding shell uses a Material 3 <strong>Navigation bar</strong> with
+      <strong>Status</strong>, <strong>Outcomes</strong> (forwarding log), and <strong>Settings</strong>.
+      Destination changes always require re-authentication and re-verification before save.
+    </p>
+    <div class="meta">
+      <span class="chip">Branch: feature/material3-ui-mockups</span>
+      <span class="chip">3-tab NavigationBar</span>
+      <span class="chip">Seed #4F46E5</span>
+    </div>
+
+    <div class="grid">
+      <h2 class="section-title">Main app (Navigation bar)</h2>
+
+      <a class="card-link" href="10-status.html">
+        <div class="thumb">
+          <h2>10 · Status</h2>
+          <p>Health, quota, pause — primary status dashboard.</p>
+          <div class="preview"><iframe src="10-status.html" title="Status"></iframe></div>
+        </div>
+      </a>
+      <a class="card-link" href="11-outcomes.html">
+        <div class="thumb">
+          <h2>11 · Outcomes</h2>
+          <p>Forwarding log with filters; metadata only.</p>
+          <div class="preview"><iframe src="11-outcomes.html" title="Outcomes"></iframe></div>
+        </div>
+      </a>
+      <a class="card-link" href="12-settings.html">
+        <div class="thumb">
+          <h2>12 · Settings</h2>
+          <p>View current setup; open edit flow.</p>
+          <div class="preview"><iframe src="12-settings.html" title="Settings"></iframe></div>
+        </div>
+      </a>
+      <a class="card-link" href="12b-settings-edit.html">
+        <div class="thumb">
+          <h2>12b · Edit setup</h2>
+          <p>Modify SIMs + destination (dirty destination).</p>
+          <div class="preview"><iframe src="12b-settings-edit.html" title="Edit"></iframe></div>
+        </div>
+      </a>
+      <a class="card-link" href="12c-settings-reauth.html">
+        <div class="thumb">
+          <h2>12c · Re-authenticate</h2>
+          <p>Required for every destination change.</p>
+          <div class="preview"><iframe src="12c-settings-reauth.html" title="Reauth"></iframe></div>
+        </div>
+      </a>
+      <a class="card-link" href="12d-settings-reverify.html">
+        <div class="thumb">
+          <h2>12d · Re-verify</h2>
+          <p>New code to the new destination, then save.</p>
+          <div class="preview"><iframe src="12d-settings-reverify.html" title="Reverify"></iframe></div>
+        </div>
+      </a>
+      <a class="card-link" href="12e-settings-saved.html">
+        <div class="thumb">
+          <h2>12e · Saved</h2>
+          <p>Confirmed setup after auth + verification.</p>
+          <div class="preview"><iframe src="12e-settings-saved.html" title="Saved"></iframe></div>
+        </div>
+      </a>
+
+      <h2 class="section-title">Onboarding (pre–nav bar)</h2>
+
+      <a class="card-link" href="01-disclosure.html">
+        <div class="thumb">
+          <h2>01 · Disclosure</h2>
+          <p>First-run disclosure + private OTP privilege.</p>
+          <div class="preview"><iframe src="01-disclosure.html" title="Disclosure"></iframe></div>
+        </div>
+      </a>
+      <a class="card-link" href="02-permissions.html">
+        <div class="thumb">
+          <h2>02 · Permissions</h2>
+          <p>Permission chips and CTAs.</p>
+          <div class="preview"><iframe src="02-permissions.html" title="Permissions"></iframe></div>
+        </div>
+      </a>
+      <a class="card-link" href="03-inbound-sim.html">
+        <div class="thumb">
+          <h2>03 · Inbound SIM</h2>
+          <p>Optional OS-number override.</p>
+          <div class="preview"><iframe src="03-inbound-sim.html" title="Inbound"></iframe></div>
+        </div>
+      </a>
+      <a class="card-link" href="04-destination.html">
+        <div class="thumb">
+          <h2>04 · Destination</h2>
+          <p>First-time verify during onboarding.</p>
+          <div class="preview"><iframe src="04-destination.html" title="Destination"></iframe></div>
+        </div>
+      </a>
+      <a class="card-link" href="05-dashboard.html">
+        <div class="thumb">
+          <h2>05 · Legacy single dashboard</h2>
+          <p>Superseded by Status + Outcomes tabs (kept for comparison).</p>
+          <div class="preview"><iframe src="05-dashboard.html" title="Legacy"></iframe></div>
+        </div>
+      </a>
+      <a class="card-link" href="06-notification.html">
+        <div class="thumb">
+          <h2>06 · Notification</h2>
+          <p>Ongoing status + Pause.</p>
+          <div class="preview"><iframe src="06-notification.html" title="Notification"></iframe></div>
+        </div>
+      </a>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,3 @@
+# SHA-256 certificate digest for the project's release APK signer.
+# This fingerprint is public; never commit the signing keystore or passwords.
+6be3287095e831e6b4b25686d1625d313d1d2d682f16c2ed37f2fc4b7c8f2996

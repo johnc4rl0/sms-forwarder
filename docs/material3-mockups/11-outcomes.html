@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>M3 Mock — Outcomes</title>
+  <link rel="stylesheet" href="m3.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet" />
+</head>
+<body class="solo-page">
+  <div>
+    <div class="phone">
+      <div class="status-bar"><span>9:41</span><span class="status-icons">▮▮▮ · 5G · ⚡</span></div>
+      <div class="app-body">
+        <div class="top-app-bar">
+          <div class="title">Outcomes</div>
+          <div class="icon-btn" title="Filter">⊕</div>
+        </div>
+        <div class="scroll">
+          <p class="body">
+            Forwarding log — metadata only. Message bodies and full numbers are not retained.
+          </p>
+          <div class="chip-row">
+            <span class="filter-chip selected">All</span>
+            <span class="filter-chip">Sent</span>
+            <span class="filter-chip">Failed</span>
+            <span class="filter-chip">Partial</span>
+          </div>
+          <div class="card elevated">
+            <div class="list-item">
+              <strong>SENT</strong> · 1 segment
+              <div class="meta">Today 10:49 · no error category</div>
+            </div>
+            <div class="list-item">
+              <strong>SENT</strong> · 1 segment
+              <div class="meta">Today 10:47 · no error category</div>
+            </div>
+            <div class="list-item">
+              <strong>FAILED</strong> · 1 segment
+              <div class="meta">Yesterday 18:02 · TRANSIENT_RADIO</div>
+            </div>
+            <div class="list-item">
+              <strong>PARTIAL</strong> · 2 segments
+              <div class="meta">Yesterday 12:11 · PARTIAL_SEND</div>
+            </div>
+            <div class="list-item" style="border-bottom:none">
+              <strong>UNKNOWN</strong> · 1 segment
+              <div class="meta">Mon 09:03 · CALLBACK_TIMEOUT</div>
+            </div>
+          </div>
+          <p class="body" style="margin-top:8px">Last 50 outcomes. Bodies purged after terminal state.</p>
+        </div>
+        <div data-nav="outcomes"></div>
+      </div>
+      <div class="home-indicator"></div>
+    </div>
+    <div class="frame-label">11 · Outcomes (forwarding log) · Nav bar</div>
+  </div>
+  <script src="partials-nav.js"></script>
+</body>
+</html>

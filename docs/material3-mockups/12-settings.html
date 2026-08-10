@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>M3 Mock — Settings</title>
+  <link rel="stylesheet" href="m3.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet" />
+</head>
+<body class="solo-page">
+  <div>
+    <div class="phone">
+      <div class="status-bar"><span>9:41</span><span class="status-icons">▮▮▮ · 5G · ⚡</span></div>
+      <div class="app-body">
+        <div class="top-app-bar">
+          <div class="title">Settings</div>
+        </div>
+        <div class="scroll">
+          <p class="body">View and change forwarding setup. Saving line changes pauses unsent work. Destination changes always require device auth and re-verification.</p>
+
+          <div class="card elevated">
+            <div class="card-title">Current setup</div>
+            <div class="settings-row">
+              <div>
+                <div class="label">Inbound (source)</div>
+                <div class="value">Slot 0 · SIM · +…4567</div>
+              </div>
+              <span class="chev">›</span>
+            </div>
+            <div class="settings-row">
+              <div>
+                <div class="label">Outbound (send)</div>
+                <div class="value">Slot 1 · eSIM · +…1140</div>
+              </div>
+              <span class="chev">›</span>
+            </div>
+            <div class="settings-row" style="border-bottom:none">
+              <div>
+                <div class="label">Destination</div>
+                <div class="value">+…4548 · Verified</div>
+              </div>
+              <span class="chev">›</span>
+            </div>
+          </div>
+
+          <div class="btn-row">
+            <a href="12b-settings-edit.html" class="btn filled" style="text-decoration:none">Edit setup</a>
+          </div>
+
+          <div class="card" style="margin-top:16px">
+            <div class="card-title">Safety</div>
+            <div class="stat-row"><span class="k">Destination change</span><span>Auth + re-verify</span></div>
+            <div class="stat-row"><span class="k">Line change</span><span>Pause + purge unsent</span></div>
+            <div class="stat-row"><span class="k">Encryption</span><span>Keystore AES-GCM</span></div>
+          </div>
+
+          <div class="card filled">
+            <div class="card-title">About</div>
+            <div class="stat-row"><span class="k">App</span><span>SMS Forwarder</span></div>
+            <div class="stat-row"><span class="k">Internet</span><span>Not used</span></div>
+            <div class="stat-row"><span class="k">Version</span><span>1.0.0</span></div>
+          </div>
+        </div>
+        <div data-nav="settings"></div>
+      </div>
+      <div class="home-indicator"></div>
+    </div>
+    <div class="frame-label">12 · Settings · Current setup</div>
+  </div>
+  <script src="partials-nav.js"></script>
+</body>
+</html>

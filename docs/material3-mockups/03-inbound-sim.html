@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>M3 Mock — Inbound SIM</title>
+  <link rel="stylesheet" href="m3.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet" />
+</head>
+<body class="solo-page">
+  <div>
+    <div class="phone">
+      <div class="status-bar"><span>9:41</span><span class="status-icons">▮▮▮ · 5G · ⚡</span></div>
+      <div class="app-body">
+        <div class="step-meta">Setup · 4 of 7</div>
+        <div class="linear-progress"><i style="width:57%"></i></div>
+        <div class="scroll">
+          <h1 class="headline">Inbound SIM</h1>
+          <p class="body">
+            Choose which SIM or eSIM receives messages to forward. Routing uses the subscription ID, not the displayed number.
+          </p>
+          <div class="radio-list">
+            <div class="radio-item selected">
+              <div class="radio-dot"></div>
+              <div>
+                <div class="line-title">Slot 0 · SIM · Carrier A</div>
+                <div class="line-sub">+1 ··· · 4567 · subId=5</div>
+                <div class="line-sub" style="margin-top:8px">
+                  Routing uses subscription ID. Enter a number only if the OS value is wrong.
+                </div>
+                <div class="linkish">OS number is wrong — enter different number</div>
+              </div>
+            </div>
+            <div class="radio-item">
+              <div class="radio-dot"></div>
+              <div>
+                <div class="line-title">Slot 1 · eSIM · Carrier B</div>
+                <div class="line-sub">+1 ··· · 1140 · subId=4</div>
+              </div>
+            </div>
+          </div>
+          <div class="btn-row">
+            <button class="btn outlined" type="button">Refresh lines</button>
+          </div>
+          <div class="nav-pair">
+            <button class="btn text" type="button">Back</button>
+            <button class="btn filled" type="button">Use this line</button>
+          </div>
+        </div>
+      </div>
+      <div class="home-indicator"></div>
+    </div>
+    <div class="frame-label">03 · Inbound SIM (PC-001 optional override) · Light</div>
+  </div>
+</body>
+</html>

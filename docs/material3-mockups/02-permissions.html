@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>M3 Mock — Permissions</title>
+  <link rel="stylesheet" href="m3.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet" />
+</head>
+<body class="solo-page">
+  <div>
+    <div class="phone">
+      <div class="status-bar"><span>9:41</span><span class="status-icons">▮▮▮ · 5G · ⚡</span></div>
+      <div class="app-body">
+        <div class="step-meta">Setup · 2 of 7</div>
+        <div class="linear-progress"><i style="width:28%"></i></div>
+        <div class="scroll">
+          <h1 class="headline">Permissions</h1>
+          <p class="body">
+            Required to receive and send text SMS on the lines you select. Hard-restricted SMS permissions need ADB or managed allowlisting before grant.
+          </p>
+          <div class="card elevated">
+            <div class="stat-row"><span class="k">Receive SMS</span><span class="badge ok">Granted</span></div>
+            <div class="stat-row"><span class="k">Send SMS</span><span class="badge ok">Granted</span></div>
+            <div class="stat-row"><span class="k">Phone state</span><span class="badge ok">Granted</span></div>
+            <div class="stat-row"><span class="k">Phone numbers</span><span class="badge ok">Granted</span></div>
+            <div class="stat-row"><span class="k">Notifications</span><span class="badge">Needed</span></div>
+          </div>
+          <div class="banner info">If grant fails, reinstall with SMS permission allowlisting (see README).</div>
+          <div class="btn-row">
+            <button class="btn filled" type="button">Grant permissions</button>
+            <button class="btn outlined" type="button">Open app settings</button>
+          </div>
+          <div class="nav-pair">
+            <button class="btn text" type="button">Back</button>
+            <button class="btn tonal" type="button">Continue</button>
+          </div>
+        </div>
+      </div>
+      <div class="home-indicator"></div>
+    </div>
+    <div class="frame-label">02 · Permissions · Light</div>
+  </div>
+</body>
+</html>

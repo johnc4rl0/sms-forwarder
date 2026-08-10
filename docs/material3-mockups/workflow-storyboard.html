@@ -1,0 +1,543 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="SMS Forwarder workflow with app UI checkpoints." />
+  <title>SMS Forwarder — UI storyboard</title>
+  <style>
+    :root {
+      --canvas: #f7f9fa;
+      --paper: #ffffff;
+      --ink: #18232d;
+      --muted: #60707c;
+      --quiet: #87939d;
+      --line: #d7dfe4;
+      --accent: #2c7377;
+      --accent-soft: #e4f0ef;
+      --warm: #9a6a28;
+      --radius: 12px;
+      font-family: "Sora", "Avenir Next", "Segoe UI", sans-serif;
+      color: var(--ink);
+      background: var(--canvas);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--canvas);
+      color: var(--ink);
+    }
+
+    a { color: inherit; }
+
+    .shell {
+      width: min(1440px, calc(100% - 48px));
+      margin: 0 auto;
+      padding: 28px 0 72px;
+    }
+
+    .sitebar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--line);
+      font-size: 12px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 750;
+    }
+
+    .brand::before {
+      content: "";
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--accent);
+    }
+
+    .sitebar span:last-child { color: var(--quiet); }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(360px, .84fr);
+      gap: clamp(36px, 7vw, 108px);
+      align-items: end;
+      padding: 72px 0 64px;
+    }
+
+    .eyebrow {
+      margin: 0 0 18px;
+      color: var(--accent);
+      font-family: "IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      max-width: 680px;
+      margin: 0;
+      font-size: clamp(3rem, 5vw, 5rem);
+      line-height: .98;
+      letter-spacing: -.06em;
+    }
+
+    .hero-copy {
+      max-width: 540px;
+      margin: 24px 0 0;
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.55;
+    }
+
+    .hero-note {
+      margin: 0 0 4px;
+      padding-left: 20px;
+      border-left: 2px solid var(--accent);
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    .hero-note strong { color: var(--ink); font-weight: 650; }
+
+    .rail-wrap {
+      padding: 24px;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+    }
+
+    .rail-heading {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      margin-bottom: 18px;
+      color: var(--quiet);
+      font-family: "IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
+      font-size: 11px;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+
+    .rail {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+    }
+
+    .rail-step {
+      min-width: 0;
+      padding: 16px 14px 18px;
+      border-right: 1px solid var(--line);
+    }
+
+    .rail-step:last-child { border-right: 0; }
+
+    .rail-dot {
+      display: grid;
+      place-items: center;
+      width: 24px;
+      height: 24px;
+      margin-bottom: 14px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 750;
+    }
+
+    .rail-step h2 {
+      margin: 0 0 6px;
+      font-size: 14px;
+      line-height: 1.2;
+      letter-spacing: -.02em;
+    }
+
+    .rail-step p {
+      margin: 0;
+      color: var(--quiet);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .story {
+      display: grid;
+      grid-template-columns: 200px minmax(0, 1fr);
+      gap: 44px;
+      padding-top: 82px;
+    }
+
+    .spine {
+      position: sticky;
+      top: 24px;
+      align-self: start;
+    }
+
+    .spine h2 {
+      margin: 0 0 14px;
+      font-size: 19px;
+      letter-spacing: -.04em;
+    }
+
+    .spine p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .spine-links {
+      display: grid;
+      gap: 10px;
+      margin-top: 24px;
+    }
+
+    .spine-links a {
+      color: var(--accent);
+      font-size: 12px;
+      text-decoration: none;
+    }
+
+    .spine-links a:hover { text-decoration: underline; }
+
+    .checkpoints {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 14px;
+      align-items: start;
+    }
+
+    .checkpoint {
+      min-width: 0;
+      overflow: hidden;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      transition: transform .35s ease, box-shadow .35s ease;
+    }
+
+    .checkpoint:hover {
+      position: relative;
+      z-index: 2;
+      transform: translateY(-4px) scale(1.015);
+      box-shadow: 0 14px 28px rgba(24, 35, 45, .12);
+    }
+
+    .checkpoint-media {
+      display: block;
+      width: 100%;
+      height: auto;
+      object-fit: contain;
+      object-position: center top;
+      background: #e9edef;
+      border-bottom: 1px solid var(--line);
+      cursor: zoom-in;
+      animation: media-in .65s ease both;
+      transition: opacity .35s ease;
+    }
+
+    .checkpoint-body { padding: 16px 15px 17px; }
+
+    .checkpoint-kicker {
+      margin: 0 0 9px;
+      color: var(--accent);
+      font-family: "IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+
+    .checkpoint h3 {
+      margin: 0 0 8px;
+      font-size: 16px;
+      letter-spacing: -.035em;
+    }
+
+    .checkpoint p {
+      min-height: 58px;
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .checkpoint-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-top: 16px;
+      padding-top: 12px;
+      border-top: 1px solid var(--line);
+      color: var(--quiet);
+      font-family: "IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
+      font-size: 10px;
+    }
+
+    .checkpoint-footer a { color: var(--accent); text-decoration: none; }
+    .checkpoint-footer a:hover { text-decoration: underline; }
+
+    .close {
+      display: flex;
+      justify-content: space-between;
+      gap: 24px;
+      margin-top: 64px;
+      padding: 22px 0 0;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .close a { color: var(--accent); text-decoration: none; }
+    .close a:hover { text-decoration: underline; }
+
+    .lightbox {
+      width: min(92vw, 760px);
+      max-width: 92vw;
+      padding: 0;
+      border: 0;
+      background: transparent;
+    }
+
+    .lightbox::backdrop { background: rgba(24, 35, 45, .72); }
+
+    .lightbox-content {
+      position: relative;
+      display: grid;
+      place-items: center;
+    }
+
+    .lightbox-image {
+      display: block;
+      width: auto;
+      height: auto;
+      max-width: 92vw;
+      max-height: 88vh;
+      border: 1px solid rgba(255, 255, 255, .35);
+      border-radius: var(--radius);
+      background: var(--paper);
+      box-shadow: 0 24px 64px rgba(0, 0, 0, .28);
+    }
+
+    .lightbox-close {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      z-index: 1;
+      border: 0;
+      border-radius: 999px;
+      padding: 8px 12px;
+      background: var(--ink);
+      color: #fff;
+      font: 600 12px/1 "Sora", "Avenir Next", "Segoe UI", sans-serif;
+      cursor: pointer;
+    }
+
+    @keyframes media-in {
+      from { opacity: .78; transform: scale(.985); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .checkpoint-media { animation: none; }
+      .checkpoint, .checkpoint-media { transition: none; }
+      .checkpoint:hover { transform: none; }
+    }
+
+    @media (max-width: 1180px) {
+      .hero { grid-template-columns: 1fr; gap: 36px; }
+      .hero-note { max-width: 620px; }
+      .checkpoints { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 780px) {
+      .shell { width: min(100% - 28px, 620px); padding-top: 18px; }
+      .sitebar { font-size: 10px; }
+      .sitebar span:last-child { display: none; }
+      .hero { padding: 52px 0 42px; }
+      h1 { font-size: clamp(2.8rem, 13vw, 4.5rem); }
+      .rail-wrap { padding: 16px; overflow-x: auto; }
+      .rail { width: 760px; }
+      .story { grid-template-columns: 1fr; gap: 28px; padding-top: 56px; }
+      .spine { position: static; }
+      .checkpoints { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .close { display: grid; }
+    }
+
+    @media (max-width: 460px) {
+      .checkpoints { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="sitebar">
+      <span class="brand">SMS Forwarder</span>
+      <span>UI storyboard</span>
+    </header>
+
+    <section class="hero" aria-labelledby="page-title">
+      <div>
+        <p class="eyebrow">Workflow / product surface</p>
+        <h1 id="page-title">A message takes the safe path.</h1>
+        <p class="hero-copy">The system flow and the user experience are shown together here: receive, validate, protect, send, and retain only what is needed to explain the outcome.</p>
+      </div>
+      <p class="hero-note"><strong>Read the rail left to right.</strong><br />The app screens below are representative checkpoints. Labels show storyboard order. Links open the source mockup pages.</p>
+    </section>
+
+    <section class="rail-wrap" aria-labelledby="rail-title">
+      <div class="rail-heading">
+        <span id="rail-title">Forwarding rail</span>
+        <span>Fail closed at every gate</span>
+      </div>
+      <div class="rail">
+        <article class="rail-step"><div class="rail-dot">1</div><h2>Receive</h2><p>Inbound SMS on the selected source line.</p></article>
+        <article class="rail-step"><div class="rail-dot">2</div><h2>Validate</h2><p>Permissions, privilege, identity, loop, quota.</p></article>
+        <article class="rail-step"><div class="rail-dot">3</div><h2>Queue</h2><p>Encrypt and persist the forwarding job.</p></article>
+        <article class="rail-step"><div class="rail-dot">4</div><h2>Send</h2><p>Use the chosen outbound subscription.</p></article>
+        <article class="rail-step"><div class="rail-dot">5</div><h2>Observe</h2><p>Record a bounded, metadata-only result.</p></article>
+      </div>
+    </section>
+
+    <section class="story" aria-labelledby="checkpoints-title">
+      <aside class="spine">
+        <p class="eyebrow">UI checkpoints</p>
+        <h2 id="checkpoints-title">What the user sees.</h2>
+        <p>These screens make the system boundaries visible before forwarding is enabled and after a result is recorded.</p>
+        <nav class="spine-links" aria-label="Storyboard links">
+          <a href="../workflow.svg">Open the full workflow diagram →</a>
+          <a href="README.md">Open the mockup index →</a>
+        </nav>
+      </aside>
+
+      <div class="checkpoints">
+        <article class="checkpoint">
+          <img class="checkpoint-media" src="assets/app/01-disclosure.png" alt="App mockup showing the SMS forwarding disclosure screen" />
+          <div class="checkpoint-body">
+            <p class="checkpoint-kicker">Before receive</p>
+            <h3>Disclose</h3>
+            <p>The user understands that message bodies, including OTPs, may be copied to another number.</p>
+            <div class="checkpoint-footer"><span>01 / onboarding</span><a href="01-disclosure.html">open</a></div>
+          </div>
+        </article>
+
+        <article class="checkpoint">
+          <img class="checkpoint-media" src="assets/app/02-permissions.png" alt="App mockup showing SMS permissions and notification checks" />
+          <div class="checkpoint-body">
+            <p class="checkpoint-kicker">Gate 1</p>
+            <h3>Clear the prerequisites</h3>
+            <p>Required permissions and notifications must pass before forwarding can start.</p>
+            <div class="checkpoint-footer"><span>02 / setup</span><a href="02-permissions.html">open</a></div>
+          </div>
+        </article>
+
+        <article class="checkpoint">
+          <img class="checkpoint-media" src="assets/app/03-inbound-sim.png" alt="App mockup showing inbound SIM selection" />
+          <div class="checkpoint-body">
+            <p class="checkpoint-kicker">Gate 2</p>
+            <h3>Choose the source</h3>
+            <p>Routing is tied to a specific subscription identity, never silently to the device default.</p>
+            <div class="checkpoint-footer"><span>03 / setup</span><a href="03-inbound-sim.html">open</a></div>
+          </div>
+        </article>
+
+        <article class="checkpoint">
+          <img class="checkpoint-media" src="assets/app/04-destination.png" alt="App mockup showing destination verification" />
+          <div class="checkpoint-body">
+            <p class="checkpoint-kicker">Gate 3</p>
+            <h3>Verify the destination</h3>
+            <p>A new destination is verified through the chosen outbound line before activation.</p>
+            <div class="checkpoint-footer"><span>04 / setup</span><a href="04-destination.html">open</a></div>
+          </div>
+        </article>
+
+        <article class="checkpoint">
+          <img class="checkpoint-media" src="assets/app/10-status.png" alt="App mockup showing enabled forwarding status" />
+          <div class="checkpoint-body">
+            <p class="checkpoint-kicker">After send</p>
+            <h3>Stay visible</h3>
+            <p>Health, quota, selected lines, and an immediate pause action remain visible.</p>
+            <div class="checkpoint-footer"><span>05 / status</span><a href="10-status.html">open</a></div>
+          </div>
+        </article>
+
+        <article class="checkpoint">
+          <img class="checkpoint-media" src="assets/app/11-outcomes.png" alt="App mockup showing metadata-only forwarding outcomes" />
+          <div class="checkpoint-body">
+            <p class="checkpoint-kicker">Terminal state</p>
+            <h3>Explain the result</h3>
+            <p>The outcome is useful without retaining the body, sender, or other sensitive history.</p>
+            <div class="checkpoint-footer"><span>06 / outcomes</span><a href="11-outcomes.html">open</a></div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <footer class="close">
+      <span>Design mockup only. All data shown is synthetic.</span>
+    </footer>
+  </main>
+
+  <dialog class="lightbox" id="image-dialog" aria-label="Full-size app screenshot">
+    <div class="lightbox-content">
+      <button class="lightbox-close" type="button" aria-label="Close full-size screenshot">Close</button>
+      <img class="lightbox-image" alt="" />
+    </div>
+  </dialog>
+
+  <script>
+    (() => {
+      const dialog = document.getElementById("image-dialog");
+      const fullImage = dialog.querySelector(".lightbox-image");
+      const closeButton = dialog.querySelector(".lightbox-close");
+      const thumbnails = document.querySelectorAll(".checkpoint-media");
+
+      function closeDialog() {
+        if (dialog.open && typeof dialog.close === "function") dialog.close();
+        else dialog.removeAttribute("open");
+      }
+
+      function openDialog(image) {
+        fullImage.src = image.currentSrc || image.src;
+        fullImage.alt = image.alt;
+        if (typeof dialog.showModal === "function") dialog.showModal();
+        else dialog.setAttribute("open", "");
+        closeButton.focus();
+      }
+
+      thumbnails.forEach((image) => {
+        image.tabIndex = 0;
+        image.setAttribute("role", "button");
+        image.setAttribute("aria-label", image.alt + ". Open full-size screenshot");
+        image.addEventListener("click", () => openDialog(image));
+        image.addEventListener("keydown", (event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            openDialog(image);
+          }
+        });
+      });
+
+      closeButton.addEventListener("click", closeDialog);
+      dialog.addEventListener("click", (event) => {
+        if (event.target === dialog) closeDialog();
+      });
+    })();
+  </script>
+</body>
+</html>

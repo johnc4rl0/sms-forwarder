@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>M3 Mock — Edit setup</title>
+  <link rel="stylesheet" href="m3.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet" />
+</head>
+<body class="solo-page">
+  <div>
+    <div class="phone">
+      <div class="status-bar"><span>9:41</span><span class="status-icons">▮▮▮ · 5G · ⚡</span></div>
+      <div class="app-body">
+        <div class="top-app-bar">
+          <a class="icon-btn" href="12-settings.html" style="text-decoration:none">←</a>
+          <div class="title">Edit setup</div>
+        </div>
+        <div class="scroll">
+          <div class="banner warn">
+            Changing destination clears verification and requires device authentication plus a new code. Forwarding stays off for the new number until verified and saved.
+          </div>
+
+          <div class="card elevated">
+            <div class="card-title">Inbound SIM</div>
+            <div class="radio-list">
+              <div class="radio-item selected">
+                <div class="radio-dot"></div>
+                <div>
+                  <div class="line-title">Slot 0 · SIM · Carrier A</div>
+                  <div class="line-sub">+…4567 · subId=5</div>
+                </div>
+              </div>
+              <div class="radio-item">
+                <div class="radio-dot"></div>
+                <div>
+                  <div class="line-title">Slot 1 · eSIM · Carrier B</div>
+                  <div class="line-sub">+…1140 · subId=4</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card elevated">
+            <div class="card-title">Outbound SIM</div>
+            <div class="radio-list">
+              <div class="radio-item">
+                <div class="radio-dot"></div>
+                <div>
+                  <div class="line-title">Slot 0 · SIM · Carrier A</div>
+                  <div class="line-sub">subId=5</div>
+                </div>
+              </div>
+              <div class="radio-item selected">
+                <div class="radio-dot"></div>
+                <div>
+                  <div class="line-title">Slot 1 · eSIM · Carrier B</div>
+                  <div class="line-sub">subId=4</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card elevated">
+            <div class="card-title">Destination</div>
+            <div class="field outlined">
+              <label>Destination (E.164)</label>
+              <div class="input">+1·········· (changed)</div>
+            </div>
+            <div class="banner tertiary" style="margin-bottom:0">
+              New destination is not verified. You must authenticate and complete verification before save applies.
+            </div>
+          </div>
+
+          <div class="btn-row">
+            <a href="12c-settings-reauth.html" class="btn filled" style="text-decoration:none">Continue to authenticate</a>
+            <a href="12-settings.html" class="btn text" style="text-decoration:none">Cancel</a>
+          </div>
+        </div>
+      </div>
+      <div class="home-indicator"></div>
+    </div>
+    <div class="frame-label">12b · Edit setup · Destination dirty</div>
+  </div>
+</body>
+</html>
