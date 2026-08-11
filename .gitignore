@@ -84,3 +84,6 @@ device_ui.xml
 # Local product/UX backlog (may reference private field-test context)
 docs/pending-changes.md
 **/pending-changes.md
+
+# Local security reports (may contain private paths and finding details)
+CLAUDE-SECURITY-*/
