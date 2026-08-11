@@ -42,7 +42,7 @@ The forwarded message has this format:
 
 [![SMS Forwarder workflow diagram](docs/workflow.svg)](docs/workflow.svg)
 
-Open the [UI storyboard](docs/material3-mockups/workflow-storyboard.html) for the app screens.
+Open the [rendered UI storyboard](https://johnc4rl0.github.io/sms-forwarder/material3-mockups/workflow-storyboard.html) for the app screens.
 
 ## What the app does not do
 
