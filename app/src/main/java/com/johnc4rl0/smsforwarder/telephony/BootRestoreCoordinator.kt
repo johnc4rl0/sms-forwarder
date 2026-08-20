@@ -104,6 +104,7 @@ class BootRestoreCoordinator(
         when (val v = subscriptionCatalog.validate(source)) {
             is LineValidation.Invalid -> return when (v.reason) {
                 PauseReason.SOURCE_IDENTITY_MISMATCH -> PauseReason.SOURCE_IDENTITY_MISMATCH
+                PauseReason.SOURCE_IDENTITY_UNAVAILABLE -> PauseReason.SOURCE_IDENTITY_UNAVAILABLE
                 else -> PauseReason.SOURCE_SUBSCRIPTION_INACTIVE
             }
             LineValidation.Valid -> Unit
@@ -111,6 +112,7 @@ class BootRestoreCoordinator(
         when (val v = subscriptionCatalog.validate(outbound)) {
             is LineValidation.Invalid -> return when (v.reason) {
                 PauseReason.SOURCE_IDENTITY_MISMATCH -> PauseReason.OUTBOUND_IDENTITY_MISMATCH
+                PauseReason.SOURCE_IDENTITY_UNAVAILABLE -> PauseReason.OUTBOUND_IDENTITY_UNAVAILABLE
                 else -> PauseReason.OUTBOUND_SUBSCRIPTION_INACTIVE
             }
             LineValidation.Valid -> Unit

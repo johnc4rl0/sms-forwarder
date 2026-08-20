@@ -47,10 +47,12 @@ class HealthCheckWorker(
                 when {
                     src is LineValidation.Invalid -> when (src.reason) {
                         PauseReason.SOURCE_IDENTITY_MISMATCH -> PauseReason.SOURCE_IDENTITY_MISMATCH
+                        PauseReason.SOURCE_IDENTITY_UNAVAILABLE -> PauseReason.SOURCE_IDENTITY_UNAVAILABLE
                         else -> PauseReason.SOURCE_SUBSCRIPTION_INACTIVE
                     }
                     out is LineValidation.Invalid -> when (out.reason) {
                         PauseReason.SOURCE_IDENTITY_MISMATCH -> PauseReason.OUTBOUND_IDENTITY_MISMATCH
+                        PauseReason.SOURCE_IDENTITY_UNAVAILABLE -> PauseReason.OUTBOUND_IDENTITY_UNAVAILABLE
                         else -> PauseReason.OUTBOUND_SUBSCRIPTION_INACTIVE
                     }
                     else -> null

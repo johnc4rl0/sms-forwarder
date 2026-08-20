@@ -50,9 +50,9 @@ class SubscriptionCatalogInstrumentedTest {
 
         lines.forEach { line ->
             assertThat(line.subscriptionId).isAtLeast(0)
-            // Identity token is a hash — never raw ICCID length for a typical ICCID.
+            // Identity token is versioned evidence — never raw ICCID.
             line.identityToken?.let { token ->
-                assertThat(token.length).isEqualTo(64) // sha256 hex
+                assertThat(token.startsWith("v1:")).isTrue()
             }
         }
     }

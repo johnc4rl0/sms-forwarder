@@ -96,16 +96,16 @@ class DefaultForwardingEngine(
         }
 
         // --- Identity mismatch (stored vs currently reported) ---
-        identityMismatch(source, runtime)?.let { reason ->
+        identityMismatch(source, runtime, isSource = true)?.let { (pause, skip) ->
             return ForwardDecision.PauseAndSkip(
-                pauseReason = reason,
-                skipReason = SkipReason.IDENTITY_MISMATCH,
+                pauseReason = pause,
+                skipReason = skip,
             )
         }
-        identityMismatch(outbound, runtime)?.let { reason ->
+        identityMismatch(outbound, runtime, isSource = false)?.let { (pause, skip) ->
             return ForwardDecision.PauseAndSkip(
-                pauseReason = reason,
-                skipReason = SkipReason.IDENTITY_MISMATCH,
+                pauseReason = pause,
+                skipReason = skip,
             )
         }
 
@@ -186,22 +186,35 @@ class DefaultForwardingEngine(
     }
 
     /**
-     * When the selection stored an identity token and the live token differs (or is absent),
-     * fail closed with the appropriate pause reason.
+     * When stored identity token differs from or is unavailable compared to live token,
+     * fail closed with the appropriate pause and skip reason.
      */
-    private fun identityMismatch(selection: LineSelection, runtime: RuntimeSnapshot): PauseReason? {
-        val stored = selection.identityToken ?: return null
+    private fun identityMismatch(
+        selection: LineSelection,
+        runtime: RuntimeSnapshot,
+        isSource: Boolean,
+    ): Pair<PauseReason, SkipReason>? {
+        val stored = selection.identityToken
         val current = runtime.currentIdentityTokens[selection.subscriptionId]
-        if (current == null || current != stored) {
-            // Distinguish source vs outbound by matching against config
-            val sourceId = runtime.config.source?.subscriptionId
-            return if (selection.subscriptionId == sourceId) {
-                PauseReason.SOURCE_IDENTITY_MISMATCH
-            } else {
-                PauseReason.OUTBOUND_IDENTITY_MISMATCH
+        return when (SubscriptionIdentity.compare(stored, current)) {
+            IdentityComparisonResult.Same -> null
+            IdentityComparisonResult.Different -> {
+                val pause = if (isSource) {
+                    PauseReason.SOURCE_IDENTITY_MISMATCH
+                } else {
+                    PauseReason.OUTBOUND_IDENTITY_MISMATCH
+                }
+                pause to SkipReason.IDENTITY_MISMATCH
+            }
+            IdentityComparisonResult.Unknown -> {
+                val pause = if (isSource) {
+                    PauseReason.SOURCE_IDENTITY_UNAVAILABLE
+                } else {
+                    PauseReason.OUTBOUND_IDENTITY_UNAVAILABLE
+                }
+                pause to SkipReason.IDENTITY_UNAVAILABLE
             }
         }
-        return null
     }
 
     companion object {

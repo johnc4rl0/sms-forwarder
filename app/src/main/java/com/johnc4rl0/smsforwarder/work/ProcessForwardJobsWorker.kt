@@ -340,12 +340,14 @@ class ProcessForwardJobsWorker(
     private fun sourcePauseReason(validation: LineValidation.Invalid): PauseReason =
         when (validation.reason) {
             PauseReason.SOURCE_IDENTITY_MISMATCH -> PauseReason.SOURCE_IDENTITY_MISMATCH
+            PauseReason.SOURCE_IDENTITY_UNAVAILABLE -> PauseReason.SOURCE_IDENTITY_UNAVAILABLE
             else -> PauseReason.SOURCE_SUBSCRIPTION_INACTIVE
         }
 
     private fun outboundPauseReason(validation: LineValidation.Invalid): PauseReason =
         when (validation.reason) {
             PauseReason.SOURCE_IDENTITY_MISMATCH -> PauseReason.OUTBOUND_IDENTITY_MISMATCH
+            PauseReason.SOURCE_IDENTITY_UNAVAILABLE -> PauseReason.OUTBOUND_IDENTITY_UNAVAILABLE
             else -> PauseReason.OUTBOUND_SUBSCRIPTION_INACTIVE
         }
 

@@ -55,6 +55,35 @@ interface ActivationCoordinator {
 
     /** Apply a safety/health pause with [reason]. */
     suspend fun safetyPause(reason: PauseReason)
+
+    /**
+     * Authenticated repair for source SIM binding.
+     * Validates line selection against live catalog, prompts for device authentication,
+     * revalidates catalog under submission gate, checks for destination conflicts,
+     * updates the binding atomically, and purges unsent payloads.
+     */
+    suspend fun repairSourceLine(
+        selection: LineSelection,
+        authenticate: suspend () -> DeviceAuthResult,
+    ): RepairResult
+
+    /**
+     * Authenticated repair for outbound SIM binding.
+     */
+    suspend fun repairOutboundLine(
+        selection: LineSelection,
+        authenticate: suspend () -> DeviceAuthResult,
+    ): RepairResult
+}
+
+sealed class RepairResult {
+    data object Success : RepairResult()
+    data object AuthCancelled : RepairResult()
+    data object AuthFailed : RepairResult()
+    data object LineNotFound : RepairResult()
+    data object CatalogDrift : RepairResult()
+    data class DestinationConflict(val message: String) : RepairResult()
+    data class Blocked(val reason: PauseReason) : RepairResult()
 }
 
 sealed class VerificationSendResult {

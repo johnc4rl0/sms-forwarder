@@ -26,6 +26,9 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+import com.johnc4rl0.smsforwarder.domain.IdentityComparisonResult
+import com.johnc4rl0.smsforwarder.domain.SubscriptionIdentity
+
 enum class SettingsStep {
     View,
     Edit,
@@ -59,8 +62,16 @@ data class SettingsUiState(
         }
     val linesChanged: Boolean
         get() {
-            val srcDiff = selectedSourceSubId != null && selectedSourceSubId != config.source?.subscriptionId
-            val outDiff = selectedOutboundSubId != null && selectedOutboundSubId != config.outbound?.subscriptionId
+            val liveSource = activeLines.find { it.subscriptionId == selectedSourceSubId }
+            val liveOutbound = activeLines.find { it.subscriptionId == selectedOutboundSubId }
+            val srcDiff = selectedSourceSubId != null && (
+                selectedSourceSubId != config.source?.subscriptionId ||
+                SubscriptionIdentity.compare(config.source?.identityToken, liveSource?.identityToken) != IdentityComparisonResult.Same
+            )
+            val outDiff = selectedOutboundSubId != null && (
+                selectedOutboundSubId != config.outbound?.subscriptionId ||
+                SubscriptionIdentity.compare(config.outbound?.identityToken, liveOutbound?.identityToken) != IdentityComparisonResult.Same
+            )
             return srcDiff || outDiff
         }
 }
@@ -337,12 +348,12 @@ class SettingsViewModel(
         val sourceSel = lineToSelection(sourceLine, cfg.source)
         val outboundSel = lineToSelection(outboundLine, cfg.outbound)
         if (cfg.source?.subscriptionId != sourceId ||
-            cfg.source?.identityToken != sourceSel.identityToken
+            SubscriptionIdentity.compare(cfg.source?.identityToken, sourceSel.identityToken) != IdentityComparisonResult.Same
         ) {
             activation.setSourceLine(sourceSel)
         }
         if (cfg.outbound?.subscriptionId != outboundId ||
-            cfg.outbound?.identityToken != outboundSel.identityToken
+            SubscriptionIdentity.compare(cfg.outbound?.identityToken, outboundSel.identityToken) != IdentityComparisonResult.Same
         ) {
             activation.setOutboundLine(outboundSel)
         }

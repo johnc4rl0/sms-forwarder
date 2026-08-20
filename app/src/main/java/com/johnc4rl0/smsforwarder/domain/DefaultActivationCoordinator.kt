@@ -365,6 +365,98 @@ class DefaultActivationCoordinator(
         onConfigChanged(next)
     }
 
+    override suspend fun repairSourceLine(
+        selection: LineSelection,
+        authenticate: suspend () -> DeviceAuthResult,
+    ): RepairResult = repairLine(isSource = true, selection = selection, authenticate = authenticate)
+
+    override suspend fun repairOutboundLine(
+        selection: LineSelection,
+        authenticate: suspend () -> DeviceAuthResult,
+    ): RepairResult = repairLine(isSource = false, selection = selection, authenticate = authenticate)
+
+    private suspend fun repairLine(
+        isSource: Boolean,
+        selection: LineSelection,
+        authenticate: suspend () -> DeviceAuthResult,
+    ): RepairResult {
+        val initialLines = subscriptionCatalog.listActiveLines()
+        val initialLine = initialLines.find { it.subscriptionId == selection.subscriptionId }
+            ?: return RepairResult.LineNotFound
+
+        when (val auth = runAuth(authenticate)) {
+            DeviceAuthResult.Success -> Unit
+            DeviceAuthResult.Cancelled -> return RepairResult.AuthCancelled
+            DeviceAuthResult.Failed -> return RepairResult.AuthFailed
+        }
+
+        return submissionGate.withLock {
+            val freshLines = subscriptionCatalog.listActiveLines()
+            val freshLine = freshLines.find { it.subscriptionId == selection.subscriptionId }
+                ?: return@withLock RepairResult.LineNotFound
+
+            val driftComparison = SubscriptionIdentity.compare(initialLine.identityToken, freshLine.identityToken)
+            if (driftComparison != IdentityComparisonResult.Same) {
+                return@withLock RepairResult.CatalogDrift
+            }
+
+            val currentConfig = configRepository.getConfig()
+            val repairedLine = LineSelection(
+                subscriptionId = freshLine.subscriptionId,
+                slotIndex = freshLine.slotIndex,
+                carrierDisplayName = freshLine.carrierDisplayName,
+                reportedNumberE164 = freshLine.reportedNumberE164,
+                manualNumberE164 = selection.manualNumberE164
+                    ?: (if (isSource) currentConfig.source else currentConfig.outbound)
+                        ?.takeIf { it.subscriptionId == freshLine.subscriptionId }?.manualNumberE164,
+                identityToken = freshLine.identityToken,
+            )
+
+            val candidateConfig = if (isSource) {
+                currentConfig.copy(source = repairedLine)
+            } else {
+                currentConfig.copy(outbound = repairedLine)
+            }
+
+            val dest = candidateConfig.destinationE164
+            if (!dest.isNullOrBlank()) {
+                val locals = collectKnownLocalNumbers(candidateConfig)
+                if (E164.isLocalNumber(dest, locals)) {
+                    return@withLock RepairResult.DestinationConflict(
+                        "Destination conflicts with one of this device's lines.",
+                    )
+                }
+            }
+
+            try {
+                forwardJobRepository.purgeUnsentJobs()
+                forwardJobRepository.purgeSensitivePayloads()
+            } catch (_: Exception) {
+                // best-effort
+            }
+
+            val next = configRepository.updateAndGet { cfg ->
+                if (isSource) {
+                    cfg.copy(
+                        source = repairedLine,
+                        configRevision = cfg.configRevision + 1,
+                        operationalState = pausedStateAfterConfigChange(cfg.operationalState),
+                        pauseReason = pauseReasonAfterConfigChange(cfg.operationalState),
+                    )
+                } else {
+                    cfg.copy(
+                        outbound = repairedLine,
+                        configRevision = cfg.configRevision + 1,
+                        operationalState = pausedStateAfterConfigChange(cfg.operationalState),
+                        pauseReason = pauseReasonAfterConfigChange(cfg.operationalState),
+                    )
+                }
+            }
+            onConfigChanged(next)
+            RepairResult.Success
+        }
+    }
+
     private suspend fun runAuth(authenticate: suspend () -> DeviceAuthResult): DeviceAuthResult =
         try {
             authenticate()
@@ -383,6 +475,7 @@ class DefaultActivationCoordinator(
         ) {
             try {
                 forwardJobRepository.purgeUnsentJobs()
+                forwardJobRepository.purgeSensitivePayloads()
             } catch (_: Exception) {
                 // best-effort
             }
@@ -445,6 +538,7 @@ class DefaultActivationCoordinator(
         when (val v = subscriptionCatalog.validate(source)) {
             is LineValidation.Invalid -> return when (v.reason) {
                 PauseReason.SOURCE_IDENTITY_MISMATCH -> PauseReason.SOURCE_IDENTITY_MISMATCH
+                PauseReason.SOURCE_IDENTITY_UNAVAILABLE -> PauseReason.SOURCE_IDENTITY_UNAVAILABLE
                 else -> PauseReason.SOURCE_SUBSCRIPTION_INACTIVE
             }
             LineValidation.Valid -> Unit
@@ -452,6 +546,7 @@ class DefaultActivationCoordinator(
         when (val v = subscriptionCatalog.validate(outbound)) {
             is LineValidation.Invalid -> return when (v.reason) {
                 PauseReason.SOURCE_IDENTITY_MISMATCH -> PauseReason.OUTBOUND_IDENTITY_MISMATCH
+                PauseReason.SOURCE_IDENTITY_UNAVAILABLE -> PauseReason.OUTBOUND_IDENTITY_UNAVAILABLE
                 else -> PauseReason.OUTBOUND_SUBSCRIPTION_INACTIVE
             }
             LineValidation.Valid -> Unit

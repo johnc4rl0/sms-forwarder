@@ -188,7 +188,33 @@ fun DashboardScreen(
                 }
             }
 
-            if (viewModel.canReEnable(state.config)) {
+            if (viewModel.isSourceIdentityIssue(state)) {
+                Button(
+                    onClick = {
+                        val activity = context as? FragmentActivity
+                        if (activity != null) {
+                            viewModel.repairSourceLine(DeviceAuthenticator(activity))
+                        }
+                    },
+                    enabled = !state.busy,
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Text(stringResource(R.string.dashboard_review_source))
+                }
+            } else if (viewModel.isOutboundIdentityIssue(state)) {
+                Button(
+                    onClick = {
+                        val activity = context as? FragmentActivity
+                        if (activity != null) {
+                            viewModel.repairOutboundLine(DeviceAuthenticator(activity))
+                        }
+                    },
+                    enabled = !state.busy,
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Text(stringResource(R.string.dashboard_review_outbound))
+                }
+            } else if (viewModel.canReEnable(state)) {
                 Button(
                     onClick = {
                         val activity = context as? FragmentActivity

@@ -11,11 +11,14 @@ import com.johnc4rl0.smsforwarder.domain.ActivationCoordinator
 import com.johnc4rl0.smsforwarder.domain.DeviceAuthResult
 import com.johnc4rl0.smsforwarder.domain.EnableResult
 import com.johnc4rl0.smsforwarder.domain.ForwardJobRepository
+import com.johnc4rl0.smsforwarder.domain.RepairResult
 import com.johnc4rl0.smsforwarder.domain.SubscriptionCatalog
 import com.johnc4rl0.smsforwarder.domain.model.ForwardingConfig
+import com.johnc4rl0.smsforwarder.domain.model.LineSelection
 import com.johnc4rl0.smsforwarder.domain.model.LineValidation
 import com.johnc4rl0.smsforwarder.domain.model.OperationalState
 import com.johnc4rl0.smsforwarder.domain.model.OutcomeMetadata
+import com.johnc4rl0.smsforwarder.domain.model.PauseReason
 import com.johnc4rl0.smsforwarder.domain.model.QuotaSnapshot
 import com.johnc4rl0.smsforwarder.domain.model.RuntimeSnapshot
 import com.johnc4rl0.smsforwarder.ui.auth.AuthOutcome
@@ -43,6 +46,8 @@ data class HealthSnapshot(
     val notificationsOk: Boolean = false,
     val sensitiveSmsPrivilegeOk: Boolean = false,
     val subscriptionsOk: Boolean = false,
+    val sourceValidation: LineValidation? = null,
+    val outboundValidation: LineValidation? = null,
     val hibernation: HibernationStatus = HibernationStatus.UNKNOWN,
 )
 
@@ -132,12 +137,11 @@ class DashboardViewModel(
         val notificationsOk = ctx.areNotificationsUsable()
         val sensitiveSmsPrivilegeOk = SensitiveSmsPrivilege.privilegeOk(ctx)
         val hibernation = ctx.hibernationStatus()
-        val subscriptionsOk = runCatching {
-            val sourceOk = config.source?.let { catalog.validate(it) is LineValidation.Valid } ?: false
-            val outboundOk =
-                config.outbound?.let { catalog.validate(it) is LineValidation.Valid } ?: false
-            sourceOk && outboundOk
-        }.getOrDefault(false)
+        val sourceValidation = config.source?.let { runCatching { catalog.validate(it) }.getOrNull() }
+        val outboundValidation = config.outbound?.let { runCatching { catalog.validate(it) }.getOrNull() }
+        val sourceOk = sourceValidation is LineValidation.Valid
+        val outboundOk = outboundValidation is LineValidation.Valid
+        val subscriptionsOk = sourceOk && outboundOk
 
         _meta.update {
             it.copy(
@@ -146,6 +150,8 @@ class DashboardViewModel(
                     notificationsOk = notificationsOk,
                     sensitiveSmsPrivilegeOk = sensitiveSmsPrivilegeOk,
                     subscriptionsOk = subscriptionsOk,
+                    sourceValidation = sourceValidation,
+                    outboundValidation = outboundValidation,
                     hibernation = hibernation,
                 ),
             )
@@ -229,17 +235,182 @@ class DashboardViewModel(
         }
     }
 
+    fun isSourceIdentityIssue(state: DashboardUiState): Boolean {
+        val reason = currentPauseReason(state.config)
+        if (reason == PauseReason.SOURCE_IDENTITY_MISMATCH || reason == PauseReason.SOURCE_IDENTITY_UNAVAILABLE) {
+            return true
+        }
+        val v = state.health.sourceValidation
+        return v is LineValidation.Invalid && (
+            v.reason == PauseReason.SOURCE_IDENTITY_MISMATCH ||
+            v.reason == PauseReason.SOURCE_IDENTITY_UNAVAILABLE
+        )
+    }
+
+    fun isOutboundIdentityIssue(state: DashboardUiState): Boolean {
+        val reason = currentPauseReason(state.config)
+        if (reason == PauseReason.OUTBOUND_IDENTITY_MISMATCH || reason == PauseReason.OUTBOUND_IDENTITY_UNAVAILABLE) {
+            return true
+        }
+        val v = state.health.outboundValidation
+        return v is LineValidation.Invalid && (
+            v.reason == PauseReason.SOURCE_IDENTITY_MISMATCH ||
+            v.reason == PauseReason.SOURCE_IDENTITY_UNAVAILABLE ||
+            v.reason == PauseReason.OUTBOUND_IDENTITY_MISMATCH ||
+            v.reason == PauseReason.OUTBOUND_IDENTITY_UNAVAILABLE
+        )
+    }
+
+    private fun currentPauseReason(config: ForwardingConfig): PauseReason? =
+        when (val op = config.operationalState) {
+            is OperationalState.SafetyPaused -> op.reason
+            is OperationalState.Unhealthy -> op.reason
+            else -> config.pauseReason
+        }
+
     fun canPause(config: ForwardingConfig): Boolean =
         config.operationalState is OperationalState.Enabled
 
-    fun canReEnable(config: ForwardingConfig): Boolean =
-        when (config.operationalState) {
-            OperationalState.ManuallyPaused,
-            is OperationalState.SafetyPaused,
-            is OperationalState.Unhealthy,
-            -> true
-            else -> false
+    fun canReEnable(state: DashboardUiState): Boolean {
+        val config = state.config
+        val health = state.health
+        if (config.operationalState is OperationalState.Enabled) return false
+        if (config.operationalState is OperationalState.NotConfigured) return false
+        if (!config.disclosureAccepted || config.source == null || config.outbound == null || !config.destinationVerified) {
+            return false
         }
+        if (!health.permissionsOk || !health.notificationsOk || !health.sensitiveSmsPrivilegeOk || !health.subscriptionsOk) {
+            return false
+        }
+        if (state.quota.sourceMessagesUsed >= RuntimeSnapshot.DEFAULT_SOURCE_MESSAGE_LIMIT ||
+            state.quota.outboundSegmentsUsed >= RuntimeSnapshot.DEFAULT_OUTBOUND_SEGMENT_LIMIT
+        ) {
+            return false
+        }
+        return true
+    }
+
+    fun repairSourceLine(authenticator: DeviceAuthenticator) {
+        val ctx = getApplication<Application>()
+        viewModelScope.launch {
+            runAction {
+                val lines = runCatching { catalog.listActiveLines() }.getOrDefault(emptyList())
+                val config = ui.value.config
+                val currentSubId = config.source?.subscriptionId
+                val targetLine = lines.find { it.subscriptionId == currentSubId } ?: lines.firstOrNull()
+                if (targetLine == null) {
+                    _meta.update { it.copy(errorMessage = ctx.getString(R.string.sim_none)) }
+                    return@runAction
+                }
+                val selection = LineSelection(
+                    subscriptionId = targetLine.subscriptionId,
+                    slotIndex = targetLine.slotIndex,
+                    carrierDisplayName = targetLine.carrierDisplayName,
+                    reportedNumberE164 = targetLine.reportedNumberE164,
+                    manualNumberE164 = config.source?.manualNumberE164,
+                    identityToken = targetLine.identityToken,
+                )
+                val result = activation.repairSourceLine(selection) {
+                    when (
+                        authenticator.authenticate(
+                            title = ctx.getString(R.string.dashboard_repair_source_auth_title),
+                            subtitle = ctx.getString(R.string.dashboard_repair_source_auth_subtitle),
+                        )
+                    ) {
+                        AuthOutcome.Success -> DeviceAuthResult.Success
+                        AuthOutcome.Cancelled -> DeviceAuthResult.Cancelled
+                        is AuthOutcome.Failed -> DeviceAuthResult.Failed
+                    }
+                }
+                when (result) {
+                    RepairResult.Success -> {
+                        refreshHealthAndQuota()
+                        _meta.update { it.copy(infoMessage = ctx.getString(R.string.dashboard_repair_success)) }
+                    }
+                    RepairResult.AuthCancelled ->
+                        _meta.update { it.copy(errorMessage = ctx.getString(R.string.activate_auth_cancelled)) }
+                    RepairResult.AuthFailed ->
+                        _meta.update { it.copy(errorMessage = ctx.getString(R.string.activate_auth_failed)) }
+                    RepairResult.CatalogDrift ->
+                        _meta.update { it.copy(errorMessage = ctx.getString(R.string.dashboard_repair_catalog_drift)) }
+                    RepairResult.LineNotFound ->
+                        _meta.update { it.copy(errorMessage = ctx.getString(R.string.dashboard_repair_line_missing)) }
+                    is RepairResult.DestinationConflict ->
+                        _meta.update { it.copy(errorMessage = ctx.getString(R.string.dashboard_repair_dest_conflict)) }
+                    is RepairResult.Blocked ->
+                        _meta.update {
+                            it.copy(
+                                errorMessage = ctx.getString(
+                                    R.string.activate_blocked,
+                                    result.reason.toUserLabel(ctx),
+                                ),
+                            )
+                        }
+                }
+            }
+        }
+    }
+
+    fun repairOutboundLine(authenticator: DeviceAuthenticator) {
+        val ctx = getApplication<Application>()
+        viewModelScope.launch {
+            runAction {
+                val lines = runCatching { catalog.listActiveLines() }.getOrDefault(emptyList())
+                val config = ui.value.config
+                val currentSubId = config.outbound?.subscriptionId
+                val targetLine = lines.find { it.subscriptionId == currentSubId } ?: lines.firstOrNull()
+                if (targetLine == null) {
+                    _meta.update { it.copy(errorMessage = ctx.getString(R.string.sim_none)) }
+                    return@runAction
+                }
+                val selection = LineSelection(
+                    subscriptionId = targetLine.subscriptionId,
+                    slotIndex = targetLine.slotIndex,
+                    carrierDisplayName = targetLine.carrierDisplayName,
+                    reportedNumberE164 = targetLine.reportedNumberE164,
+                    manualNumberE164 = config.outbound?.manualNumberE164,
+                    identityToken = targetLine.identityToken,
+                )
+                val result = activation.repairOutboundLine(selection) {
+                    when (
+                        authenticator.authenticate(
+                            title = ctx.getString(R.string.dashboard_repair_outbound_auth_title),
+                            subtitle = ctx.getString(R.string.dashboard_repair_outbound_auth_subtitle),
+                        )
+                    ) {
+                        AuthOutcome.Success -> DeviceAuthResult.Success
+                        AuthOutcome.Cancelled -> DeviceAuthResult.Cancelled
+                        is AuthOutcome.Failed -> DeviceAuthResult.Failed
+                    }
+                }
+                when (result) {
+                    RepairResult.Success -> {
+                        refreshHealthAndQuota()
+                        _meta.update { it.copy(infoMessage = ctx.getString(R.string.dashboard_repair_success)) }
+                    }
+                    RepairResult.AuthCancelled ->
+                        _meta.update { it.copy(errorMessage = ctx.getString(R.string.activate_auth_cancelled)) }
+                    RepairResult.AuthFailed ->
+                        _meta.update { it.copy(errorMessage = ctx.getString(R.string.activate_auth_failed)) }
+                    RepairResult.CatalogDrift ->
+                        _meta.update { it.copy(errorMessage = ctx.getString(R.string.dashboard_repair_catalog_drift)) }
+                    RepairResult.LineNotFound ->
+                        _meta.update { it.copy(errorMessage = ctx.getString(R.string.dashboard_repair_line_missing)) }
+                    is RepairResult.DestinationConflict ->
+                        _meta.update { it.copy(errorMessage = ctx.getString(R.string.dashboard_repair_dest_conflict)) }
+                    is RepairResult.Blocked ->
+                        _meta.update {
+                            it.copy(
+                                errorMessage = ctx.getString(
+                                    R.string.activate_blocked,
+                                    result.reason.toUserLabel(ctx),
+                                ),
+                            )
+                        }
+                }
+            }
+        }
+    }
 
     val sourceMessageLimit: Int = RuntimeSnapshot.DEFAULT_SOURCE_MESSAGE_LIMIT
     val outboundSegmentLimit: Int = RuntimeSnapshot.DEFAULT_OUTBOUND_SEGMENT_LIMIT

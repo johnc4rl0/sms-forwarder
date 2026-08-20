@@ -19,6 +19,8 @@ fun PauseReason.toUserLabel(context: Context): String {
         PauseReason.OUTBOUND_SUBSCRIPTION_INACTIVE -> R.string.pause_outbound_inactive
         PauseReason.SOURCE_IDENTITY_MISMATCH -> R.string.pause_source_identity
         PauseReason.OUTBOUND_IDENTITY_MISMATCH -> R.string.pause_outbound_identity
+        PauseReason.SOURCE_IDENTITY_UNAVAILABLE -> R.string.pause_source_identity_unavailable
+        PauseReason.OUTBOUND_IDENTITY_UNAVAILABLE -> R.string.pause_outbound_identity_unavailable
         PauseReason.MISSING_INBOUND_SUBSCRIPTION_ID -> R.string.pause_missing_sub
         PauseReason.ENCRYPTION_UNAVAILABLE -> R.string.pause_encryption
         PauseReason.HIBERNATION_RISK -> R.string.pause_hibernation

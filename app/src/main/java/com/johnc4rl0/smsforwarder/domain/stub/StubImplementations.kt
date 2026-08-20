@@ -190,4 +190,16 @@ class StubActivationCoordinator(
             )
         }
     }
+
+    override suspend fun repairSourceLine(
+        selection: LineSelection,
+        authenticate: suspend () -> DeviceAuthResult,
+    ): com.johnc4rl0.smsforwarder.domain.RepairResult =
+        com.johnc4rl0.smsforwarder.domain.RepairResult.LineNotFound
+
+    override suspend fun repairOutboundLine(
+        selection: LineSelection,
+        authenticate: suspend () -> DeviceAuthResult,
+    ): com.johnc4rl0.smsforwarder.domain.RepairResult =
+        com.johnc4rl0.smsforwarder.domain.RepairResult.LineNotFound
 }

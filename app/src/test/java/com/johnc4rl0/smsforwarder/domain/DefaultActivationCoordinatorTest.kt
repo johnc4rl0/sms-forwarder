@@ -34,7 +34,7 @@ class DefaultActivationCoordinatorTest {
         carrierDisplayName = "Src",
         reportedNumberE164 = "+15551111111",
         manualNumberE164 = null,
-        identityToken = "src-tok",
+        identityToken = "v1:icc:src-tok",
     )
     private val outbound = LineSelection(
         subscriptionId = 2,
@@ -42,7 +42,7 @@ class DefaultActivationCoordinatorTest {
         carrierDisplayName = "Out",
         reportedNumberE164 = "+15552222222",
         manualNumberE164 = null,
-        identityToken = "out-tok",
+        identityToken = "v1:icc:out-tok",
     )
     private val destination = "+15553333333"
 
@@ -92,8 +92,8 @@ class DefaultActivationCoordinatorTest {
         jobs = FakeForwardJobRepository()
         catalog = FakeSubscriptionCatalog(
             lines = listOf(
-                ActiveLine(1, 0, "Src", "+15551111111", false, "src-tok"),
-                ActiveLine(2, 1, "Out", "+15552222222", false, "out-tok"),
+                ActiveLine(1, 0, "Src", "+15551111111", false, "v1:icc:src-tok"),
+                ActiveLine(2, 1, "Out", "+15552222222", false, "v1:icc:out-tok"),
             ),
         )
     }
@@ -187,7 +187,7 @@ class DefaultActivationCoordinatorTest {
             ),
         )
         jobs.unsentPurged = false
-        coordinator().setSourceLine(source.copy(subscriptionId = 1, identityToken = "new"))
+        coordinator().setSourceLine(source.copy(subscriptionId = 1, identityToken = "v1:icc:new"))
         val cfg = configRepo.getConfig()
         assertThat(cfg.operationalState).isEqualTo(OperationalState.ManuallyPaused)
         assertThat(cfg.configRevision).isEqualTo(4)
@@ -532,6 +532,152 @@ class DefaultActivationCoordinatorTest {
         override suspend fun currentQuota(nowMillis: Long): QuotaSnapshot = quota
     }
 
+    @Test
+    fun repairSourceLine_success_sameSubId_updatesBindingAndBumpsRevision() = runBlocking {
+        // Initial setup has old token; live catalog has updated token
+        catalog = FakeSubscriptionCatalog(
+            lines = listOf(
+                ActiveLine(1, 0, "Src", "+15551111111", false, "v1:icc:repaired-token"),
+                ActiveLine(2, 1, "Out", "+15552222222", false, "v1:icc:out-tok"),
+            ),
+        )
+        configRepo.seed(
+            ForwardingConfig(
+                disclosureAccepted = true,
+                source = source.copy(identityToken = "v1:icc:old-token"),
+                outbound = outbound,
+                destinationE164 = destination,
+                destinationVerified = true,
+                operationalState = OperationalState.SafetyPaused(PauseReason.SOURCE_IDENTITY_MISMATCH),
+                pauseReason = PauseReason.SOURCE_IDENTITY_MISMATCH,
+                configRevision = 5L,
+            ),
+        )
+        jobs.unsentPurged = false
+        jobs.sensitivePurged = false
+
+        val c = coordinator()
+        val repairTarget = source.copy(identityToken = "v1:icc:repaired-token")
+        val result = c.repairSourceLine(repairTarget) { DeviceAuthResult.Success }
+
+        assertThat(result).isEqualTo(RepairResult.Success)
+        val updated = configRepo.getConfig()
+        assertThat(updated.source?.identityToken).isEqualTo("v1:icc:repaired-token")
+        assertThat(updated.configRevision).isEqualTo(6L)
+        assertThat(updated.operationalState).isEqualTo(OperationalState.ManuallyPaused)
+        assertThat(jobs.unsentPurged).isTrue()
+        assertThat(jobs.sensitivePurged).isTrue()
+    }
+
+    @Test
+    fun repairSourceLine_authCancelled_leavesConfigUnchanged() = runBlocking {
+        configRepo.seed(
+            ForwardingConfig(
+                disclosureAccepted = true,
+                source = source.copy(identityToken = "v1:icc:old-token"),
+                outbound = outbound,
+                destinationE164 = destination,
+                destinationVerified = true,
+                operationalState = OperationalState.SafetyPaused(PauseReason.SOURCE_IDENTITY_MISMATCH),
+                pauseReason = PauseReason.SOURCE_IDENTITY_MISMATCH,
+                configRevision = 5L,
+            ),
+        )
+        val c = coordinator()
+        val result = c.repairSourceLine(source) { DeviceAuthResult.Cancelled }
+        assertThat(result).isEqualTo(RepairResult.AuthCancelled)
+        val updated = configRepo.getConfig()
+        assertThat(updated.source?.identityToken).isEqualTo("v1:icc:old-token")
+        assertThat(updated.configRevision).isEqualTo(5L)
+    }
+
+    @Test
+    fun repairSourceLine_catalogDriftDuringAuth_failsClosed() = runBlocking {
+        var catalogListCount = 0
+        val driftingCatalog = object : SubscriptionCatalog {
+            override fun listActiveLines(): List<ActiveLine> {
+                catalogListCount++
+                return if (catalogListCount == 1) {
+                    listOf(
+                        ActiveLine(1, 0, "Src", "+15551111111", false, "v1:icc:token-1"),
+                        ActiveLine(2, 1, "Out", "+15552222222", false, "v1:icc:out-tok"),
+                    )
+                } else {
+                    listOf(
+                        ActiveLine(1, 0, "Src", "+15551111111", false, "v1:icc:token-2"), // Drifted!
+                        ActiveLine(2, 1, "Out", "+15552222222", false, "v1:icc:out-tok"),
+                    )
+                }
+            }
+
+            override fun validate(selection: LineSelection): LineValidation = LineValidation.Valid
+        }
+        val c = DefaultActivationCoordinator(
+            configRepository = configRepo,
+            forwardJobRepository = jobs,
+            subscriptionCatalog = driftingCatalog,
+            mac = mac,
+            sendVerificationSms = { _, _, _ -> true },
+            permissionsOk = { true },
+            notificationsOk = { true },
+            sensitiveSmsPrivilegeOk = { true },
+            encryptionAvailable = { true },
+            clock = { clockMs },
+            randomCode = { "123456" },
+        )
+        val target = source.copy(identityToken = "v1:icc:token-1")
+        val result = c.repairSourceLine(target) { DeviceAuthResult.Success }
+        assertThat(result).isEqualTo(RepairResult.CatalogDrift)
+    }
+
+    @Test
+    fun repairSourceLine_destinationConflict_rejectsRepair() = runBlocking {
+        catalog = FakeSubscriptionCatalog(
+            lines = listOf(
+                ActiveLine(1, 0, "Src", "+15559999999", false, "v1:icc:src-tok"),
+                ActiveLine(2, 1, "Out", "+15552222222", false, "v1:icc:out-tok"),
+            ),
+        )
+        configRepo.seed(
+            ForwardingConfig(
+                disclosureAccepted = true,
+                source = source,
+                outbound = outbound,
+                destinationE164 = "+15559999999", // Conflicts with repaired source line
+                destinationVerified = true,
+            ),
+        )
+        val target = source.copy(reportedNumberE164 = "+15559999999")
+        val result = coordinator().repairSourceLine(target) { DeviceAuthResult.Success }
+        assertThat(result).isInstanceOf(RepairResult.DestinationConflict::class.java)
+    }
+
+    @Test
+    fun repairOutboundLine_success_independentFromSource() = runBlocking {
+        catalog = FakeSubscriptionCatalog(
+            lines = listOf(
+                ActiveLine(1, 0, "Src", "+15551111111", false, "v1:icc:src-tok"),
+                ActiveLine(2, 1, "Out", "+15552222222", false, "v1:icc:repaired-out"),
+            ),
+        )
+        configRepo.seed(
+            ForwardingConfig(
+                disclosureAccepted = true,
+                source = source,
+                outbound = outbound.copy(identityToken = "v1:icc:old-out"),
+                destinationE164 = destination,
+                destinationVerified = true,
+                configRevision = 1L,
+            ),
+        )
+        val target = outbound.copy(identityToken = "v1:icc:repaired-out")
+        val result = coordinator().repairOutboundLine(target) { DeviceAuthResult.Success }
+        assertThat(result).isEqualTo(RepairResult.Success)
+        val updated = configRepo.getConfig()
+        assertThat(updated.outbound?.identityToken).isEqualTo("v1:icc:repaired-out")
+        assertThat(updated.configRevision).isEqualTo(2L)
+    }
+
     private class FakeSubscriptionCatalog(
         private val lines: List<ActiveLine>,
     ) : SubscriptionCatalog {
@@ -540,13 +686,11 @@ class DefaultActivationCoordinatorTest {
         override fun validate(selection: LineSelection): LineValidation {
             val match = lines.find { it.subscriptionId == selection.subscriptionId }
                 ?: return LineValidation.Invalid(PauseReason.SOURCE_SUBSCRIPTION_INACTIVE)
-            // Align with engine / AndroidSubscriptionCatalog: missing live token is mismatch.
-            if (selection.identityToken != null &&
-                (match.identityToken == null || selection.identityToken != match.identityToken)
-            ) {
-                return LineValidation.Invalid(PauseReason.SOURCE_IDENTITY_MISMATCH)
+            return when (SubscriptionIdentity.compare(selection.identityToken, match.identityToken)) {
+                IdentityComparisonResult.Same -> LineValidation.Valid
+                IdentityComparisonResult.Different -> LineValidation.Invalid(PauseReason.SOURCE_IDENTITY_MISMATCH)
+                IdentityComparisonResult.Unknown -> LineValidation.Invalid(PauseReason.SOURCE_IDENTITY_UNAVAILABLE)
             }
-            return LineValidation.Valid
         }
     }
 }

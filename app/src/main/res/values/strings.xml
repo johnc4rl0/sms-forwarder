@@ -210,8 +210,21 @@
     <string name="pause_outbound_inactive">Outbound SIM inactive or removed</string>
     <string name="pause_source_identity">Source SIM identity changed</string>
     <string name="pause_outbound_identity">Outbound SIM identity changed</string>
+    <string name="pause_source_identity_unavailable">Source SIM identity unavailable</string>
+    <string name="pause_outbound_identity_unavailable">Outbound SIM identity unavailable</string>
     <string name="pause_missing_sub">Missing inbound subscription id</string>
     <string name="pause_encryption">Encryption unavailable</string>
     <string name="pause_hibernation">Unused-app hibernation risk</string>
     <string name="pause_config">Configuration incomplete</string>
+
+    <string name="dashboard_review_source">Review source SIM</string>
+    <string name="dashboard_review_outbound">Review outbound SIM</string>
+    <string name="dashboard_repair_source_auth_title">Update source SIM</string>
+    <string name="dashboard_repair_source_auth_subtitle">Authenticate to update source SIM binding</string>
+    <string name="dashboard_repair_outbound_auth_title">Update outbound SIM</string>
+    <string name="dashboard_repair_outbound_auth_subtitle">Authenticate to update outbound SIM binding</string>
+    <string name="dashboard_repair_success">SIM identity updated</string>
+    <string name="dashboard_repair_catalog_drift">SIM line changed during authentication. Please retry.</string>
+    <string name="dashboard_repair_line_missing">Selected SIM line is no longer active</string>
+    <string name="dashboard_repair_dest_conflict">Destination conflicts with one of this device\'s lines</string>
 </resources>

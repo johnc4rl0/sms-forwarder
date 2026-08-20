@@ -27,7 +27,7 @@ class DefaultForwardingEngineTest {
         carrierDisplayName = "Src",
         reportedNumberE164 = "+15551111111",
         manualNumberE164 = null,
-        identityToken = "src-token",
+        identityToken = "v1:icc:src-token",
     )
 
     private val outbound = LineSelection(
@@ -36,7 +36,7 @@ class DefaultForwardingEngineTest {
         carrierDisplayName = "Out",
         reportedNumberE164 = "+15552222222",
         manualNumberE164 = null,
-        identityToken = "out-token",
+        identityToken = "v1:icc:out-token",
     )
 
     private val destination = "+15553333333"
@@ -74,7 +74,7 @@ class DefaultForwardingEngineTest {
         notificationsOk: Boolean = true,
         sensitiveSmsPrivilegeOk: Boolean = true,
         active: Set<Int> = setOf(10, 20),
-        identities: Map<Int, String?> = mapOf(10 to "src-token", 20 to "out-token"),
+        identities: Map<Int, String?> = mapOf(10 to "v1:icc:src-token", 20 to "v1:icc:out-token"),
         sourceUsed: Int = 0,
         segmentsUsed: Int = 0,
         sourceLimit: Int = 100,
@@ -250,11 +250,44 @@ class DefaultForwardingEngineTest {
     fun pause_whenSourceIdentityMismatch() {
         val d = engine().accept(
             inbound(),
-            snapshot(identities = mapOf(10 to "other-token", 20 to "out-token")),
+            snapshot(identities = mapOf(10 to "v1:icc:other-token", 20 to "v1:icc:out-token")),
         )
         assertThat((d as ForwardDecision.PauseAndSkip).pauseReason)
             .isEqualTo(PauseReason.SOURCE_IDENTITY_MISMATCH)
         assertThat(d.skipReason).isEqualTo(SkipReason.IDENTITY_MISMATCH)
+    }
+
+    @Test
+    fun pause_whenSourceIdentityUnavailable_legacyOrMissingToken() {
+        val d = engine().accept(
+            inbound(),
+            snapshot(identities = mapOf(10 to null, 20 to "v1:icc:out-token")),
+        )
+        assertThat((d as ForwardDecision.PauseAndSkip).pauseReason)
+            .isEqualTo(PauseReason.SOURCE_IDENTITY_UNAVAILABLE)
+        assertThat(d.skipReason).isEqualTo(SkipReason.IDENTITY_UNAVAILABLE)
+    }
+
+    @Test
+    fun pause_whenOutboundIdentityMismatch() {
+        val d = engine().accept(
+            inbound(),
+            snapshot(identities = mapOf(10 to "v1:icc:src-token", 20 to "v1:icc:other-out")),
+        )
+        assertThat((d as ForwardDecision.PauseAndSkip).pauseReason)
+            .isEqualTo(PauseReason.OUTBOUND_IDENTITY_MISMATCH)
+        assertThat(d.skipReason).isEqualTo(SkipReason.IDENTITY_MISMATCH)
+    }
+
+    @Test
+    fun pause_whenOutboundIdentityUnavailable() {
+        val d = engine().accept(
+            inbound(),
+            snapshot(identities = mapOf(10 to "v1:icc:src-token", 20 to null)),
+        )
+        assertThat((d as ForwardDecision.PauseAndSkip).pauseReason)
+            .isEqualTo(PauseReason.OUTBOUND_IDENTITY_UNAVAILABLE)
+        assertThat(d.skipReason).isEqualTo(SkipReason.IDENTITY_UNAVAILABLE)
     }
 
     // --- Loop / destination / dedup ---
