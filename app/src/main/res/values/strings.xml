@@ -226,5 +226,6 @@
     <string name="dashboard_repair_success">SIM identity updated</string>
     <string name="dashboard_repair_catalog_drift">SIM line changed during authentication. Please retry.</string>
     <string name="dashboard_repair_line_missing">Selected SIM line is no longer active</string>
+    <string name="dashboard_repair_purge_failed">Could not clear pending message data. Please retry.</string>
     <string name="dashboard_repair_dest_conflict">Destination conflicts with one of this device\'s lines</string>
 </resources>

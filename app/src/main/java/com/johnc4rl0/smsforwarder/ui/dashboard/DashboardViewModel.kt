@@ -340,6 +340,8 @@ class DashboardViewModel(
                         _meta.update { it.copy(errorMessage = ctx.getString(R.string.dashboard_repair_catalog_drift)) }
                     RepairResult.LineNotFound ->
                         _meta.update { it.copy(errorMessage = ctx.getString(R.string.dashboard_repair_line_missing)) }
+                    RepairResult.PurgeFailed ->
+                        _meta.update { it.copy(errorMessage = ctx.getString(R.string.dashboard_repair_purge_failed)) }
                     is RepairResult.DestinationConflict ->
                         _meta.update { it.copy(errorMessage = ctx.getString(R.string.dashboard_repair_dest_conflict)) }
                     is RepairResult.Blocked ->
@@ -401,6 +403,8 @@ class DashboardViewModel(
                         _meta.update { it.copy(errorMessage = ctx.getString(R.string.dashboard_repair_catalog_drift)) }
                     RepairResult.LineNotFound ->
                         _meta.update { it.copy(errorMessage = ctx.getString(R.string.dashboard_repair_line_missing)) }
+                    RepairResult.PurgeFailed ->
+                        _meta.update { it.copy(errorMessage = ctx.getString(R.string.dashboard_repair_purge_failed)) }
                     is RepairResult.DestinationConflict ->
                         _meta.update { it.copy(errorMessage = ctx.getString(R.string.dashboard_repair_dest_conflict)) }
                     is RepairResult.Blocked ->

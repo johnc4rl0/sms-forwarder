@@ -499,6 +499,7 @@ class DefaultActivationCoordinatorTest {
     private class FakeForwardJobRepository : ForwardJobRepository {
         var unsentPurged = false
         var sensitivePurged = false
+        var failPurge = false
         var quota = QuotaSnapshot(0, 0, 0L)
 
         override suspend fun enqueue(job: ForwardJob) = Unit
@@ -522,10 +523,12 @@ class DefaultActivationCoordinatorTest {
         ) = Unit
 
         override suspend fun purgeSensitivePayloads(jobIds: Collection<String>?) {
+            if (failPurge) throw IllegalStateException("purge failed")
             sensitivePurged = true
         }
 
         override suspend fun purgeUnsentJobs() {
+            if (failPurge) throw IllegalStateException("purge failed")
             unsentPurged = true
         }
 
@@ -628,6 +631,29 @@ class DefaultActivationCoordinatorTest {
         val target = source.copy(identityToken = "v1:icc:token-1")
         val result = c.repairSourceLine(target) { DeviceAuthResult.Success }
         assertThat(result).isEqualTo(RepairResult.CatalogDrift)
+    }
+
+    @Test
+    fun repairSourceLine_purgeFailure_leavesBindingUnchanged() = runBlocking {
+        configRepo.seed(
+            ForwardingConfig(
+                disclosureAccepted = true,
+                source = source.copy(identityToken = "v1:icc:old-token"),
+                outbound = outbound,
+                destinationE164 = destination,
+                destinationVerified = true,
+                operationalState = OperationalState.SafetyPaused(PauseReason.SOURCE_IDENTITY_MISMATCH),
+                pauseReason = PauseReason.SOURCE_IDENTITY_MISMATCH,
+                configRevision = 5L,
+            ),
+        )
+        jobs.failPurge = true
+
+        val result = coordinator().repairSourceLine(source) { DeviceAuthResult.Success }
+
+        assertThat(result).isEqualTo(RepairResult.PurgeFailed)
+        assertThat(configRepo.getConfig().source?.identityToken).isEqualTo("v1:icc:old-token")
+        assertThat(configRepo.getConfig().configRevision).isEqualTo(5L)
     }
 
     @Test

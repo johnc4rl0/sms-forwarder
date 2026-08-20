@@ -432,7 +432,7 @@ class DefaultActivationCoordinator(
                 forwardJobRepository.purgeUnsentJobs()
                 forwardJobRepository.purgeSensitivePayloads()
             } catch (_: Exception) {
-                // best-effort
+                return@withLock RepairResult.PurgeFailed
             }
 
             val next = configRepository.updateAndGet { cfg ->

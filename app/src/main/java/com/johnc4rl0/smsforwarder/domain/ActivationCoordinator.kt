@@ -82,6 +82,7 @@ sealed class RepairResult {
     data object AuthFailed : RepairResult()
     data object LineNotFound : RepairResult()
     data object CatalogDrift : RepairResult()
+    data object PurgeFailed : RepairResult()
     data class DestinationConflict(val message: String) : RepairResult()
     data class Blocked(val reason: PauseReason) : RepairResult()
 }
