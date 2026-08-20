@@ -8,6 +8,7 @@ import com.johnc4rl0.smsforwarder.domain.model.OperationalState
 import com.johnc4rl0.smsforwarder.domain.model.PauseReason
 import java.security.MessageDigest
 import java.security.SecureRandom
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -432,6 +433,18 @@ class DefaultActivationCoordinator(
                 forwardJobRepository.purgeUnsentJobs()
                 forwardJobRepository.purgeSensitivePayloads()
             } catch (_: Exception) {
+                val reason = if (isSource) {
+                    PauseReason.SOURCE_IDENTITY_MISMATCH
+                } else {
+                    PauseReason.OUTBOUND_IDENTITY_MISMATCH
+                }
+                val paused = configRepository.updateAndGet { cfg ->
+                    cfg.copy(
+                        operationalState = OperationalState.SafetyPaused(reason),
+                        pauseReason = reason,
+                    )
+                }
+                onConfigChanged(paused)
                 return@withLock RepairResult.PurgeFailed
             }
 
@@ -476,8 +489,12 @@ class DefaultActivationCoordinator(
             try {
                 forwardJobRepository.purgeUnsentJobs()
                 forwardJobRepository.purgeSensitivePayloads()
-            } catch (_: Exception) {
-                // best-effort
+            } catch (e: Exception) {
+                if (e is CancellationException) throw e
+                throw IllegalStateException(
+                    "Could not clear pending message data. Please retry.",
+                    e,
+                )
             }
         }
     }

@@ -204,6 +204,56 @@ class DefaultActivationCoordinatorTest {
     }
 
     @Test
+    fun setSourceLine_purgeFailure_leavesConfigUnchanged() = runBlocking {
+        val initial = ForwardingConfig(
+            disclosureAccepted = true,
+            source = source,
+            outbound = outbound,
+            destinationE164 = destination,
+            destinationVerified = true,
+            operationalState = OperationalState.Enabled,
+            configRevision = 3,
+        )
+        configRepo.seed(initial)
+        jobs.failPurge = true
+
+        var thrown: IllegalStateException? = null
+        try {
+            coordinator().setSourceLine(source.copy(identityToken = "v1:icc:new"))
+        } catch (e: IllegalStateException) {
+            thrown = e
+        }
+
+        assertThat(thrown).isNotNull()
+        assertThat(configRepo.getConfig()).isEqualTo(initial)
+    }
+
+    @Test
+    fun setOutboundLine_purgeFailure_leavesConfigUnchanged() = runBlocking {
+        val initial = ForwardingConfig(
+            disclosureAccepted = true,
+            source = source,
+            outbound = outbound,
+            destinationE164 = destination,
+            destinationVerified = true,
+            operationalState = OperationalState.Enabled,
+            configRevision = 3,
+        )
+        configRepo.seed(initial)
+        jobs.failPurge = true
+
+        var thrown: IllegalStateException? = null
+        try {
+            coordinator().setOutboundLine(outbound.copy(identityToken = "v1:icc:new"))
+        } catch (e: IllegalStateException) {
+            thrown = e
+        }
+
+        assertThat(thrown).isNotNull()
+        assertThat(configRepo.getConfig()).isEqualTo(initial)
+    }
+
+    @Test
     fun sendVerificationCode_storesHmacOnly_andRateLimits() = runBlocking {
         seedReadyForVerification()
         val c = coordinator(code = "654321")
@@ -642,8 +692,8 @@ class DefaultActivationCoordinatorTest {
                 outbound = outbound,
                 destinationE164 = destination,
                 destinationVerified = true,
-                operationalState = OperationalState.SafetyPaused(PauseReason.SOURCE_IDENTITY_MISMATCH),
-                pauseReason = PauseReason.SOURCE_IDENTITY_MISMATCH,
+                operationalState = OperationalState.Enabled,
+                pauseReason = null,
                 configRevision = 5L,
             ),
         )
@@ -654,6 +704,8 @@ class DefaultActivationCoordinatorTest {
         assertThat(result).isEqualTo(RepairResult.PurgeFailed)
         assertThat(configRepo.getConfig().source?.identityToken).isEqualTo("v1:icc:old-token")
         assertThat(configRepo.getConfig().configRevision).isEqualTo(5L)
+        assertThat(configRepo.getConfig().operationalState)
+            .isEqualTo(OperationalState.SafetyPaused(PauseReason.SOURCE_IDENTITY_MISMATCH))
     }
 
     @Test
