@@ -23,6 +23,7 @@ fun PauseReason.toUserLabel(context: Context): String {
         PauseReason.OUTBOUND_IDENTITY_UNAVAILABLE -> R.string.pause_outbound_identity_unavailable
         PauseReason.MISSING_INBOUND_SUBSCRIPTION_ID -> R.string.pause_missing_sub
         PauseReason.ENCRYPTION_UNAVAILABLE -> R.string.pause_encryption
+        PauseReason.PAYLOAD_PURGE_FAILED -> R.string.pause_payload_purge
         PauseReason.HIBERNATION_RISK -> R.string.pause_hibernation
         PauseReason.CONFIGURATION_INCOMPLETE -> R.string.pause_config
     }

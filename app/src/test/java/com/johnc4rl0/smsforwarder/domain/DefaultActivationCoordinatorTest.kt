@@ -225,7 +225,9 @@ class DefaultActivationCoordinatorTest {
         }
 
         assertThat(thrown).isNotNull()
-        assertThat(configRepo.getConfig()).isEqualTo(initial)
+        assertThat(configRepo.getConfig().source).isEqualTo(initial.source)
+        assertThat(configRepo.getConfig().operationalState)
+            .isEqualTo(OperationalState.SafetyPaused(PauseReason.PAYLOAD_PURGE_FAILED))
     }
 
     @Test
@@ -250,7 +252,9 @@ class DefaultActivationCoordinatorTest {
         }
 
         assertThat(thrown).isNotNull()
-        assertThat(configRepo.getConfig()).isEqualTo(initial)
+        assertThat(configRepo.getConfig().outbound).isEqualTo(initial.outbound)
+        assertThat(configRepo.getConfig().operationalState)
+            .isEqualTo(OperationalState.SafetyPaused(PauseReason.PAYLOAD_PURGE_FAILED))
     }
 
     @Test

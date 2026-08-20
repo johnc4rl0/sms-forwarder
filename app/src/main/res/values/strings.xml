@@ -214,6 +214,7 @@
     <string name="pause_outbound_identity_unavailable">Outbound SIM identity unavailable</string>
     <string name="pause_missing_sub">Missing inbound subscription id</string>
     <string name="pause_encryption">Encryption unavailable</string>
+    <string name="pause_payload_purge">Pending message data could not be cleared</string>
     <string name="pause_hibernation">Unused-app hibernation risk</string>
     <string name="pause_config">Configuration incomplete</string>
 

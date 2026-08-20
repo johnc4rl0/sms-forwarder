@@ -334,6 +334,16 @@ class DefaultActivationCoordinator(
         }
 
         return submissionGate.withLock {
+            val current = configRepository.getConfig()
+            if (current.pauseReason == PauseReason.PAYLOAD_PURGE_FAILED) {
+                try {
+                    forwardJobRepository.purgeUnsentJobs()
+                    forwardJobRepository.purgeSensitivePayloads()
+                } catch (e: Exception) {
+                    if (e is CancellationException) throw e
+                    return@withLock EnableResult.Blocked(PauseReason.PAYLOAD_PURGE_FAILED)
+                }
+            }
             val blockedAfter = readinessBlocker(checkQuota = true)
             if (blockedAfter != null) return@withLock EnableResult.Blocked(blockedAfter)
 
@@ -491,6 +501,13 @@ class DefaultActivationCoordinator(
                 forwardJobRepository.purgeSensitivePayloads()
             } catch (e: Exception) {
                 if (e is CancellationException) throw e
+                val paused = configRepository.updateAndGet { cfg ->
+                    cfg.copy(
+                        operationalState = OperationalState.SafetyPaused(PauseReason.PAYLOAD_PURGE_FAILED),
+                        pauseReason = PauseReason.PAYLOAD_PURGE_FAILED,
+                    )
+                }
+                onConfigChanged(paused)
                 throw IllegalStateException(
                     "Could not clear pending message data. Please retry.",
                     e,
