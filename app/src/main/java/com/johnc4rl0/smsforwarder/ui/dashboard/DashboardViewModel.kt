@@ -13,6 +13,7 @@ import com.johnc4rl0.smsforwarder.domain.EnableResult
 import com.johnc4rl0.smsforwarder.domain.ForwardJobRepository
 import com.johnc4rl0.smsforwarder.domain.RepairResult
 import com.johnc4rl0.smsforwarder.domain.SubscriptionCatalog
+import com.johnc4rl0.smsforwarder.domain.model.ActiveLine
 import com.johnc4rl0.smsforwarder.domain.model.ForwardingConfig
 import com.johnc4rl0.smsforwarder.domain.model.LineSelection
 import com.johnc4rl0.smsforwarder.domain.model.LineValidation
@@ -63,6 +64,10 @@ data class DashboardUiState(
     val maskedOutbound: String = "—",
     val maskedDestination: String = "—",
 )
+
+/** Find the saved subscription only. Never replace a missing subscription with another line. */
+internal fun findRepairLine(lines: List<ActiveLine>, subscriptionId: Int?): ActiveLine? =
+    subscriptionId?.let { id -> lines.find { it.subscriptionId == id } }
 
 class DashboardViewModel(
     application: Application,
@@ -297,7 +302,7 @@ class DashboardViewModel(
                 val lines = runCatching { catalog.listActiveLines() }.getOrDefault(emptyList())
                 val config = ui.value.config
                 val currentSubId = config.source?.subscriptionId
-                val targetLine = lines.find { it.subscriptionId == currentSubId } ?: lines.firstOrNull()
+                val targetLine = findRepairLine(lines, currentSubId)
                 if (targetLine == null) {
                     _meta.update { it.copy(errorMessage = ctx.getString(R.string.sim_none)) }
                     return@runAction
@@ -358,7 +363,7 @@ class DashboardViewModel(
                 val lines = runCatching { catalog.listActiveLines() }.getOrDefault(emptyList())
                 val config = ui.value.config
                 val currentSubId = config.outbound?.subscriptionId
-                val targetLine = lines.find { it.subscriptionId == currentSubId } ?: lines.firstOrNull()
+                val targetLine = findRepairLine(lines, currentSubId)
                 if (targetLine == null) {
                     _meta.update { it.copy(errorMessage = ctx.getString(R.string.sim_none)) }
                     return@runAction
